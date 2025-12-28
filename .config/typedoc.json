@@ -1,0 +1,11 @@
+{
+  "entryPoints": ["../src/index.ts"],
+  "out": "./../docs",
+  "githubPages": true,
+  "name": "cofhe.js Docs",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "media": "./../media",
+  "hideGenerator": true,
+  "customCss": "./typedoc.css"
+}
