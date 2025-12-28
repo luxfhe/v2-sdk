@@ -102,12 +102,12 @@ describe("Environment Utils", () => {
         const result = applyEnvironmentDefaults(params);
 
         expect(result.environment).toBe("TESTNET");
-        expect(result.coFheUrl).toBe("https://testnet-cofhe.fhenix.zone");
+        expect(result.coFheUrl).toBe("https://testnet-cofhe.luxfhe.zone");
         expect(result.verifierUrl).toBe(
-          "https://testnet-cofhe-vrf.fhenix.zone",
+          "https://testnet-cofhe-vrf.luxfhe.zone",
         );
         expect(result.thresholdNetworkUrl).toBe(
-          "https://testnet-cofhe-tn.fhenix.zone",
+          "https://testnet-cofhe-tn.luxfhe.zone",
         );
       });
 
@@ -143,12 +143,12 @@ describe("Environment Utils", () => {
         const result = applyEnvironmentDefaults(params);
 
         expect(result.environment).toBe("MAINNET");
-        expect(result.coFheUrl).toBe("https://mainnet-cofhe.fhenix.zone");
+        expect(result.coFheUrl).toBe("https://mainnet-cofhe.luxfhe.zone");
         expect(result.verifierUrl).toBe(
-          "https://mainnet-cofhe-vrf.fhenix.zone",
+          "https://mainnet-cofhe-vrf.luxfhe.zone",
         );
         expect(result.thresholdNetworkUrl).toBe(
-          "https://mainnet-cofhe-tn.fhenix.zone",
+          "https://mainnet-cofhe-tn.luxfhe.zone",
         );
       });
 
@@ -213,8 +213,8 @@ describe("Environment Utils", () => {
       const result = applyEnvironmentDefaults(params);
 
       expect(result.environment).toBe("TESTNET");
-      expect(result.coFheUrl).toBe("https://testnet-cofhe.fhenix.zone");
-      expect(result.verifierUrl).toBe("https://testnet-cofhe-vrf.fhenix.zone");
+      expect(result.coFheUrl).toBe("https://testnet-cofhe.luxfhe.zone");
+      expect(result.verifierUrl).toBe("https://testnet-cofhe-vrf.luxfhe.zone");
       expect(result.thresholdNetworkUrl).toBe(
         "https://custom-threshold.example.com",
       );

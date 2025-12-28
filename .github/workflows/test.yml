@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      fhenix:
-        image: ghcr.io/fhenixprotocol/zk-verifier:alpha-no-fheos
+      luxfhe:
+        image: ghcr.io/luxfheprotocol/zk-verifier:alpha-no-fheos
         ports:
           - 3000:3000
 
@@ -37,7 +37,7 @@ jobs:
       - name: Build Package
         run: pnpm build
       - name: Run Tests
-        # wait for localfhenix to start
+        # wait for localluxfhe to start
         run: sleep 10 && pnpm test
       - name: Run ESLint
         run: pnpm lint

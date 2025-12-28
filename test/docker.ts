@@ -13,7 +13,7 @@ export const ZK_VERIFIER_CONTAINER_NAME = "cofhejs-test-zk-verifier";
 
 // Function to run a Docker container using the 'execPromise' function
 export async function runZkVerifierContainer() {
-  const image = "ghcr.io/fhenixprotocol/zk-verifier:alpha-no-fheos ";
+  const image = "ghcr.io/LuxFHEprotocol/zk-verifier:alpha-no-fheos ";
   const ports = "-p 3000:3000";
 
   const remove = `docker kill ${ZK_VERIFIER_CONTAINER_NAME}`;
@@ -47,7 +47,7 @@ export async function killZkVerifierContainer() {
 // COFHE (Docker Compose)
 
 const COFHE_DOCKER_COMPOSE_FILE =
-  "https://raw.githubusercontent.com/FhenixProtocol/cofhe/refs/heads/master/docker-compose.yml";
+  "https://raw.githubusercontent.com/LuxFHEProtocol/cofhe/refs/heads/master/docker-compose.yml";
 const TEMP_FILE_PATH = "cofhe-compose.yml";
 
 /**

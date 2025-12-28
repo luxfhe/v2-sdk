@@ -3,22 +3,22 @@
 </p>
 
 <p align="center">
-  The JavaScript SDK for Fhenix
+  The JavaScript SDK for LuxFHE
 </p>
 
 <p align="center">
-  <img alt="npm" src="https://img.shields.io/npm/v/fhenixjs" />
-  <img alt="ci" style="margin-left: 0.3em" src="https://github.com/fhenixprotocol/fhenix.js/actions/workflows/test.yml/badge.svg?branch=main" />
+  <img alt="npm" src="https://img.shields.io/npm/v/luxfhejs" />
+  <img alt="ci" style="margin-left: 0.3em" src="https://github.com/luxfheprotocol/luxfhe.js/actions/workflows/test.yml/badge.svg?branch=main" />
 </p>
 
 <p align="center">
-  <a href="https://fhenixjs.fhenix.zone" target="_blank"><strong>Explore the Docs »</strong></a>
+  <a href="https://luxfhejs.luxfhe.zone" target="_blank"><strong>Explore the Docs »</strong></a>
 </p>
 
 ## General
 
-fhenix.js allows developers to add support for encrypted data when developing dApps on Fhenix.
-fhenix.js includes easy helpers for encryption, unsealing and helpers to create apps that utilize private data.
+luxfhe.js allows developers to add support for encrypted data when developing dApps on LuxFHE.
+luxfhe.js includes easy helpers for encryption, unsealing and helpers to create apps that utilize private data.
 
 ## Installation
 
@@ -28,7 +28,7 @@ fhenix.js includes easy helpers for encryption, unsealing and helpers to create 
 
 ```bash
 # Using npm
-npm install fhenixjs
+npm install luxfhejs
 ```
 
 ### Browser Installation (or simpler bundling)
@@ -38,7 +38,7 @@ which is available in the ./dist/ folder in this repo.
 
 You can also install from a CDN e.g.
 
-`https://cdn.jsdelivr.net/npm/fhenixjs@0.3.0-alpha.1/dist/fhenix.umd.min.js`
+`https://cdn.jsdelivr.net/npm/luxfhejs@0.3.0-alpha.1/dist/luxfhe.umd.min.js`
 
 #### ESM
 
@@ -46,7 +46,7 @@ You can install as a module:
 
 ```
 <script type="module">
-    import { fhenixjs } from "./dist/fhenix.esm.min.js";
+    import { luxfhejs } from "./dist/luxfhe.esm.min.js";
 </script>
 ```
 
@@ -55,12 +55,12 @@ You can install as a module:
 Or from a UMD:
 
 ```
-<script id="cofhejs" src="./dist/fhenix.umd.min.js"></script>
+<script id="cofhejs" src="./dist/luxfhe.umd.min.js"></script>
 ```
 
 #### NextJS WASM Bundling
 
-FhenixJS uses WASM for all the FHE goodness. If you're using the non-prepackaged version you'll need to configure next.js to properly use WASM via the `next.config.js` file. 
+LuxFHEJS uses WASM for all the FHE goodness. If you're using the non-prepackaged version you'll need to configure next.js to properly use WASM via the `next.config.js` file. 
 
 Otherwise, you can use the prepackaged version above that avoids having to bundle WASM.
 
@@ -115,7 +115,7 @@ Also, if you had to fiddle with a bundler or config to get it working, please sh
 
 Completely untested. Maybe yes, maybe no, maybe both.
 
-## fhenix.js sdk
+## luxfhe.js sdk
 
 `cofhejs` is designed to make interacting with FHE enabled blockchains typesafe and as streamlined as possible by providing utility functions for inputs, permits (permissions), and outputs. The sdk is an opinionated implementation of the underling `Permit` class, therefor if the sdk is too limiting for your use case (e.g. multiple active users), you can easily drop down into the core `Permit` class to extend its functionality.
 
@@ -310,14 +310,14 @@ console.log("Balance:", balance);
 import { createWalletClient, custom, getContract } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { cofhejs } from "cofhejs/web";
-import { fhenixNetwork } from "cofhejs/chains";
+import { luxfheNetwork } from "cofhejs/chains";
 import MyContractABI from "./MyContract.json";
 
 // Setup
 const account = privateKeyToAccount("0x...");
 const client = createWalletClient({
   account,
-  chain: fhenixNetwork,
+  chain: luxfheNetwork,
   transport: custom(window.ethereum)
 });
 
@@ -381,4 +381,4 @@ if (savedPermit) {
 }
 ```
 
-For more advanced use cases and detailed API documentation, please refer to our [full documentation](https://fhenixjs.fhenix.zone).
+For more advanced use cases and detailed API documentation, please refer to our [full documentation](https://luxfhejs.luxfhe.zone).

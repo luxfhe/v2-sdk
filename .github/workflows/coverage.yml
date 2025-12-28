@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      fhenix:
-        image: ghcr.io/fhenixprotocol/nitro/localfhenix:latest
+      luxfhe:
+        image: ghcr.io/luxfheprotocol/nitro/localluxfhe:latest
         ports:
           - 8545:8547 # RPC
           - 5000:3000 # Faucet
@@ -26,7 +26,7 @@ jobs:
       pull-requests: write
     env:
       SKIP_LOCAL_ENV: "true"
-      REGISTRY: ghcr.io/fhenixprotocol/nitro
+      REGISTRY: ghcr.io/luxfheprotocol/nitro
     steps:
       - uses: actions/checkout@v4
       - name: "Install Node"

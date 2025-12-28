@@ -259,13 +259,13 @@ describe("Sdk Tests", () => {
 
   // Most of the Permit logic is held within the Permit class
   // This core functionality is tested in permit.test.ts
-  // The FhenixClient acts as a utility layer to improve the experience of working with Permits
+  // The LuxFHEClient acts as a utility layer to improve the experience of working with Permits
   // The following tests target the client interaction with localstorage and its own reused stateful variables
   //   (this.account, this.chainId, this.send, this.signTypedData)
   // @architect-dev 2024-11-14
 
   it("localstorage", async () => {
-    // FhenixClient leverages a persisted zustand store to handle localstorage
+    // LuxFHEClient leverages a persisted zustand store to handle localstorage
     // zustand persist is heavily tested, this test is just to ensure that its working in our implementation
 
     await initSdkWithBob();

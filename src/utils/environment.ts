@@ -36,18 +36,18 @@ export function applyEnvironmentDefaults<T extends EnvironmentParams>(
         params.thresholdNetworkUrl || "http://127.0.0.1:3000";
       break;
     case "TESTNET":
-      result.coFheUrl = params.coFheUrl || "https://testnet-cofhe.fhenix.zone";
+      result.coFheUrl = params.coFheUrl || "https://testnet-cofhe.luxfhe.zone";
       result.verifierUrl =
-        params.verifierUrl || "https://testnet-cofhe-vrf.fhenix.zone";
+        params.verifierUrl || "https://testnet-cofhe-vrf.luxfhe.zone";
       result.thresholdNetworkUrl =
-        params.thresholdNetworkUrl || "https://testnet-cofhe-tn.fhenix.zone";
+        params.thresholdNetworkUrl || "https://testnet-cofhe-tn.luxfhe.zone";
       break;
     case "MAINNET":
-      result.coFheUrl = params.coFheUrl || "https://mainnet-cofhe.fhenix.zone";
+      result.coFheUrl = params.coFheUrl || "https://mainnet-cofhe.luxfhe.zone";
       result.verifierUrl =
-        params.verifierUrl || "https://mainnet-cofhe-vrf.fhenix.zone";
+        params.verifierUrl || "https://mainnet-cofhe-vrf.luxfhe.zone";
       result.thresholdNetworkUrl =
-        params.thresholdNetworkUrl || "https://mainnet-cofhe-tn.fhenix.zone";
+        params.thresholdNetworkUrl || "https://mainnet-cofhe-tn.luxfhe.zone";
       break;
     default:
       throw new CofhejsError({
