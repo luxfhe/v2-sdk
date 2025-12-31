@@ -55,7 +55,7 @@ You can install as a module:
 Or from a UMD:
 
 ```
-<script id="cofhejs" src="./dist/luxfhe.umd.min.js"></script>
+<script id="fhe" src="./dist/luxfhe.umd.min.js"></script>
 ```
 
 #### NextJS WASM Bundling
@@ -117,20 +117,20 @@ Completely untested. Maybe yes, maybe no, maybe both.
 
 ## luxfhe.js sdk
 
-`cofhejs` is designed to make interacting with FHE enabled blockchains typesafe and as streamlined as possible by providing utility functions for inputs, permits (permissions), and outputs. The sdk is an opinionated implementation of the underling `Permit` class, therefor if the sdk is too limiting for your use case (e.g. multiple active users), you can easily drop down into the core `Permit` class to extend its functionality.
+`fhe` is designed to make interacting with FHE enabled blockchains typesafe and as streamlined as possible by providing utility functions for inputs, permits (permissions), and outputs. The sdk is an opinionated implementation of the underling `Permit` class, therefor if the sdk is too limiting for your use case (e.g. multiple active users), you can easily drop down into the core `Permit` class to extend its functionality.
 
-NOTE: `cofhejs` is still in beta, and while we will try to avoid it, we may release breaking changes in the future if necessary.
+NOTE: `fhe` is still in beta, and while we will try to avoid it, we may release breaking changes in the future if necessary.
 
 ### Environment-specific Imports
 
-cofhejs offers environment-specific entry points to ensure optimal compatibility across different platforms:
+fhe offers environment-specific entry points to ensure optimal compatibility across different platforms:
 
 #### Browser Environments
 
 For web applications, use the browser-specific entry point:
 
 ```typescript
-import { cofhejs } from "cofhejs/web";
+import { fhe } from "fhe/web";
 ```
 
 This entry point is optimized for browser environments and handles WASM loading properly in frontend frameworks like React, Vue, or vanilla JavaScript applications.
@@ -140,7 +140,7 @@ This entry point is optimized for browser environments and handles WASM loading 
 For Node.js applications, serverless functions, or test environments like Hardhat scripts:
 
 ```typescript
-import { cofhejs } from "cofhejs/node";
+import { fhe } from "fhe/node";
 ```
 
 This entry point is optimized for Node.js environments and ensures proper WASM loading without browser-specific dependencies.
@@ -151,7 +151,7 @@ Before interacting with your users' permits and encrypted data, initialize the s
 
 ```typescript
 // Basic initialization with provider and signer
-await cofhejs.initialize({
+await fhe.initialize({
   provider: userProvider,   // Implementation of AbstractAccount in `types.ts`
   signer: userSigner,       // Implementation of AbstractSigner in `types.ts`
 })
@@ -171,8 +171,8 @@ onAccountsChanged(async (accounts) => {
   const newProvider = getUpdatedProvider(newAddress);
   const newSigner = getUpdatedSigner(newAddress);
   
-  // Re-initialize cofhejs with the new user
-  await cofhejs.initialize({
+  // Re-initialize fhe with the new user
+  await fhe.initialize({
     provider: newProvider,
     signer: newSigner
   });
@@ -185,10 +185,10 @@ Permits are a critical component for FHE interactions, allowing users to access 
 
 ```typescript
 // Create a permit with default options (self-permit for the current user)
-await cofhejs.createPermit()
+await fhe.createPermit()
 
 // Create a permit with custom options
-await cofhejs.createPermit({
+await fhe.createPermit({
   type: "self",             // "self" | "third-party" | "authorized"
   issuer: userAddress,      // The address issuing this permit
   expiration: 3600,         // Optional: Expiration time in seconds
@@ -199,7 +199,7 @@ await cofhejs.createPermit({
 })
 
 // Get the current active permit
-const permit = cofhejs.getPermit()
+const permit = fhe.getPermit()
 
 // Extract permission data for contract calls
 const permission = permit.getPermission()
@@ -211,17 +211,17 @@ To interact with FHE-enabled contracts, plaintext values must be encrypted befor
 
 ```typescript
 // Encrypting a single value
-const encryptedValue = cofhejs.encrypt(Encryptable.uint32(42))
+const encryptedValue = fhe.encrypt(Encryptable.uint32(42))
 
 // Encrypting multiple values in a single call
-const encryptedArgs = cofhejs.encrypt([
+const encryptedArgs = fhe.encrypt([
   Encryptable.uint8(5),
   Encryptable.uint256("1000000000000000000"), // 1 ETH
   Encryptable.bool(true)
 ])
 
 // Complex data structures with automatic permission injection
-const encryptedData = cofhejs.encrypt({
+const encryptedData = fhe.encrypt({
   permission: "permission", // Special string that gets replaced with the active permission
   amount: Encryptable.uint128(1000),
   recipients: [
@@ -240,7 +240,7 @@ const encryptedData = cofhejs.encrypt({
 
 #### Available Encryption Types
 
-cofhejs supports all FHE data types:
+fhe supports all FHE data types:
 
 ```typescript
 // Integer types
@@ -265,12 +265,12 @@ When contracts return sealed encrypted data, use the `unseal` method to decrypt 
 ```typescript
 // Simple unsealing from a contract call
 const sealedBalance = await myContract.getEncryptedBalance(permission)
-const balance = await cofhejs.unseal(sealedBalance)
+const balance = await fhe.unseal(sealedBalance)
 // balance is now a plain JavaScript value
 
 // Unsealing multiple values from a structured response
 const response = await myContract.getMultipleValues(permission)
-const unsealed = await cofhejs.unseal(response)
+const unsealed = await fhe.unseal(response)
 // unsealed will maintain the same structure as response, but with decrypted values
 ```
 
@@ -280,7 +280,7 @@ const unsealed = await cofhejs.unseal(response)
 
 ```typescript
 import { ethers } from "ethers";
-import { cofhejs } from "cofhejs/web";
+import { fhe } from "fhe/web";
 import MyContractABI from "./MyContract.json";
 
 // Setup
@@ -288,19 +288,19 @@ const provider = new ethers.providers.Web3Provider(window.ethereum);
 const signer = provider.getSigner();
 const contract = new ethers.Contract(contractAddress, MyContractABI, signer);
 
-// Initialize cofhejs
-await cofhejs.initialize({ provider, signer });
-await cofhejs.createPermit();
-const permission = cofhejs.getPermit().getPermission();
+// Initialize fhe
+await fhe.initialize({ provider, signer });
+await fhe.createPermit();
+const permission = fhe.getPermit().getPermission();
 
 // Encrypt data and send transaction
-const encryptedAmount = cofhejs.encrypt(Encryptable.uint64(1000));
+const encryptedAmount = fhe.encrypt(Encryptable.uint64(1000));
 const tx = await contract.deposit(permission, encryptedAmount);
 await tx.wait();
 
 // Retrieve and unseal data
 const sealedBalance = await contract.getBalance(permission);
-const balance = await cofhejs.unseal(sealedBalance);
+const balance = await fhe.unseal(sealedBalance);
 console.log("Balance:", balance);
 ```
 
@@ -309,8 +309,8 @@ console.log("Balance:", balance);
 ```typescript
 import { createWalletClient, custom, getContract } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { cofhejs } from "cofhejs/web";
-import { luxfheNetwork } from "cofhejs/chains";
+import { fhe } from "fhe/web";
+import { luxfheNetwork } from "fhe/chains";
 import MyContractABI from "./MyContract.json";
 
 // Setup
@@ -327,18 +327,18 @@ const contract = getContract({
   client
 });
 
-// Initialize cofhejs
-await cofhejs.initialize({ provider: client, signer: account });
-await cofhejs.createPermit();
-const permission = cofhejs.getPermit().getPermission();
+// Initialize fhe
+await fhe.initialize({ provider: client, signer: account });
+await fhe.createPermit();
+const permission = fhe.getPermit().getPermission();
 
 // Encrypt and send transaction
-const encryptedVote = cofhejs.encrypt(Encryptable.bool(true));
+const encryptedVote = fhe.encrypt(Encryptable.bool(true));
 await contract.write.castVote([permission, encryptedVote]);
 
 // Get and unseal results
 const sealedResults = await contract.read.getResults([permission]);
-const results = await cofhejs.unseal(sealedResults);
+const results = await fhe.unseal(sealedResults);
 console.log("Voting results:", results);
 ```
 
@@ -347,7 +347,7 @@ console.log("Voting results:", results);
 For applications requiring more fine-grained control:
 
 ```typescript
-import { Permit } from "cofhejs/core";
+import { Permit } from "fhe/core";
 
 // Create a permit manually
 const permit = new Permit({

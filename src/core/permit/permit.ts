@@ -24,7 +24,7 @@ import {
 } from "../sdk/sealing";
 import {
   fnEip712DomainIface,
-  TaskManagerAddress,
+  FHENetworkAddress,
   fnAclIface,
 } from "../utils/consts";
 
@@ -309,14 +309,14 @@ export class Permit implements PermitInterface, PermitMetadata {
   fetchEIP712Domain = async (
     provider: AbstractProvider,
   ): Promise<EIP712Domain> => {
-    const taskManagerInterface = new ethers.Interface(fnAclIface);
-    const aclCallData = taskManagerInterface.encodeFunctionData("acl");
+    const networkInterface = new ethers.Interface(fnAclIface);
+    const aclCallData = networkInterface.encodeFunctionData("acl");
     const aclAddressResult = await provider.call({
-      to: TaskManagerAddress,
+      to: FHENetworkAddress,
       data: aclCallData,
     });
 
-    const [aclAddress] = taskManagerInterface.decodeFunctionResult(
+    const [aclAddress] = networkInterface.decodeFunctionResult(
       "acl",
       aclAddressResult,
     );

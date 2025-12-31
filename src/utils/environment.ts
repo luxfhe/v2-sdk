@@ -1,4 +1,4 @@
-import { CofhejsError, CofhejsErrorCode, EnvironmentParams } from "../types";
+import { FHEError, FHEErrorCode, EnvironmentParams } from "../types";
 
 /**
  * Applies environment-specific default values to initialization parameters
@@ -12,12 +12,12 @@ export function applyEnvironmentDefaults<T extends EnvironmentParams>(
   if (!params.environment) {
     // If no environment is provided, all URLs must be explicitly provided
     if (
-      !params.coFheUrl ||
+      !params.fheUrl ||
       !params.verifierUrl ||
       !params.thresholdNetworkUrl
     ) {
       throw new Error(
-        "When environment is not specified, coFheUrl, verifierUrl, and thresholdNetworkUrl must be provided",
+        "When environment is not specified, fheUrl, verifierUrl, and thresholdNetworkUrl must be provided",
       );
     }
     return result;
@@ -25,33 +25,33 @@ export function applyEnvironmentDefaults<T extends EnvironmentParams>(
 
   switch (params.environment) {
     case "MOCK":
-      result.coFheUrl = undefined;
+      result.fheUrl = undefined;
       result.verifierUrl = undefined;
       result.thresholdNetworkUrl = undefined;
       break;
     case "LOCAL":
-      result.coFheUrl = params.coFheUrl || "http://127.0.0.1:8448";
+      result.fheUrl = params.fheUrl || "http://127.0.0.1:8448";
       result.verifierUrl = params.verifierUrl || "http://127.0.0.1:3001";
       result.thresholdNetworkUrl =
         params.thresholdNetworkUrl || "http://127.0.0.1:3000";
       break;
     case "TESTNET":
-      result.coFheUrl = params.coFheUrl || "https://testnet-cofhe.luxfhe.zone";
+      result.fheUrl = params.fheUrl || "https://testnet-fhe.luxfhe.zone";
       result.verifierUrl =
-        params.verifierUrl || "https://testnet-cofhe-vrf.luxfhe.zone";
+        params.verifierUrl || "https://testnet-fhe-vrf.luxfhe.zone";
       result.thresholdNetworkUrl =
-        params.thresholdNetworkUrl || "https://testnet-cofhe-tn.luxfhe.zone";
+        params.thresholdNetworkUrl || "https://testnet-fhe-tn.luxfhe.zone";
       break;
     case "MAINNET":
-      result.coFheUrl = params.coFheUrl || "https://mainnet-cofhe.luxfhe.zone";
+      result.fheUrl = params.fheUrl || "https://mainnet-fhe.luxfhe.zone";
       result.verifierUrl =
-        params.verifierUrl || "https://mainnet-cofhe-vrf.luxfhe.zone";
+        params.verifierUrl || "https://mainnet-fhe-vrf.luxfhe.zone";
       result.thresholdNetworkUrl =
-        params.thresholdNetworkUrl || "https://mainnet-cofhe-tn.luxfhe.zone";
+        params.thresholdNetworkUrl || "https://mainnet-fhe-tn.luxfhe.zone";
       break;
     default:
-      throw new CofhejsError({
-        code: CofhejsErrorCode.UnknownEnvironment,
+      throw new FHEError({
+        code: FHEErrorCode.UnknownEnvironment,
         message: `Unknown environment: ${params.environment}`,
       });
   }

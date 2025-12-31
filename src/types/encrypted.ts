@@ -5,33 +5,33 @@ export type EncryptedNumber = {
   securityZone: number;
 };
 
-export type CoFheInItem = {
+export type FHEInItem = {
   ctHash: bigint;
   securityZone: number;
   utype: FheTypes;
   signature: string;
 };
-export type CoFheInBool = CoFheInItem & {
+export type FHEInBool = FHEInItem & {
   utype: FheTypes.Bool;
 };
-export type CoFheInUint8 = CoFheInItem & {
+export type FHEInUint8 = FHEInItem & {
   utype: FheTypes.Uint8;
 };
-export type CoFheInUint16 = CoFheInItem & {
+export type FHEInUint16 = FHEInItem & {
   utype: FheTypes.Uint16;
 };
-export type CoFheInUint32 = CoFheInItem & {
+export type FHEInUint32 = FHEInItem & {
   utype: FheTypes.Uint32;
 };
-export type CoFheInUint64 = CoFheInItem & {
+export type FHEInUint64 = FHEInItem & {
   utype: FheTypes.Uint64;
 };
-export type CoFheInUint128 = CoFheInItem & {
+export type FHEInUint128 = FHEInItem & {
   utype: FheTypes.Uint128;
 };
-export type CoFheInUint256 = CoFheInItem & {
+export type FHEInUint256 = FHEInItem & {
   utype: FheTypes.Uint256;
 };
-export type CoFheInAddress = CoFheInItem & {
+export type FHEInAddress = FHEInItem & {
   utype: FheTypes.Uint160;
 };

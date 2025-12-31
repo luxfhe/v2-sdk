@@ -9,11 +9,11 @@ const execPromise = util.promisify(require("child_process").exec);
 
 // ZK Verifier (Image)
 
-export const ZK_VERIFIER_CONTAINER_NAME = "cofhejs-test-zk-verifier";
+export const ZK_VERIFIER_CONTAINER_NAME = "luxfhe-test-zk-verifier";
 
 // Function to run a Docker container using the 'execPromise' function
 export async function runZkVerifierContainer() {
-  const image = "ghcr.io/LuxFHEprotocol/zk-verifier:alpha-no-fheos ";
+  const image = "ghcr.io/luxfi/zk-verifier:latest";
   const ports = "-p 3000:3000";
 
   const remove = `docker kill ${ZK_VERIFIER_CONTAINER_NAME}`;
@@ -44,11 +44,11 @@ export async function killZkVerifierContainer() {
   }
 }
 
-// COFHE (Docker Compose)
+// LuxFHE (Docker Compose)
 
-const COFHE_DOCKER_COMPOSE_FILE =
-  "https://raw.githubusercontent.com/LuxFHEProtocol/cofhe/refs/heads/master/docker-compose.yml";
-const TEMP_FILE_PATH = "cofhe-compose.yml";
+const FHE_DOCKER_COMPOSE_FILE =
+  "https://raw.githubusercontent.com/luxfi/fhe/refs/heads/main/docker-compose.yml";
+const TEMP_FILE_PATH = "luxfhe-compose.yml";
 
 /**
  * Fetches a remote file and saves it locally.
@@ -83,15 +83,15 @@ async function cleanup() {
 /**
  * Starts Docker Compose after ensuring the docker-compose.yml file exists.
  */
-export async function runCoFheContainers() {
+export async function runFHEContainers() {
   try {
     // Download the docker-compose.yml file
-    await fetchDockerCompose(COFHE_DOCKER_COMPOSE_FILE, TEMP_FILE_PATH);
-    console.log("CoFHE docker-compose file saved. Starting containers...");
+    await fetchDockerCompose(FHE_DOCKER_COMPOSE_FILE, TEMP_FILE_PATH);
+    console.log("LuxFHE docker-compose file saved. Starting containers...");
 
     try {
-      await stopCoFheContainers();
-      console.log("Existing CoFHE containers stopped.");
+      await stopFHEContainers();
+      console.log("Existing LuxFHE containers stopped.");
     } catch (_) {}
 
     // Run docker-compose up
@@ -112,13 +112,13 @@ export async function runCoFheContainers() {
 /**
  * Stops and removes all containers from docker-compose.
  */
-export async function stopCoFheContainers(requiresFetch = false) {
+export async function stopFHEContainers(requiresFetch = false) {
   try {
-    console.log("Stopping CoFHE containers...");
+    console.log("Stopping LuxFHE containers...");
 
     if (requiresFetch) {
-      await fetchDockerCompose(COFHE_DOCKER_COMPOSE_FILE, TEMP_FILE_PATH);
-      console.log("CoFHE docker-compose file saved. Stopping containers...");
+      await fetchDockerCompose(FHE_DOCKER_COMPOSE_FILE, TEMP_FILE_PATH);
+      console.log("LuxFHE docker-compose file saved. Stopping containers...");
     }
 
     // Run docker-compose down
@@ -135,3 +135,4 @@ export async function stopCoFheContainers(requiresFetch = false) {
     console.error("Error stopping docker-compose:", error.message);
   }
 }
+

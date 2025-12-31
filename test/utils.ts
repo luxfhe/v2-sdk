@@ -5,8 +5,8 @@ import {
   AbstractProvider,
   AbstractSigner,
   Result,
-  CofhejsError,
-  CofhejsErrorCode,
+  FHEError,
+  FHEErrorCode,
 } from "../src/types";
 import { expect } from "vitest";
 
@@ -132,14 +132,14 @@ export const expectResultSuccess = <T>(result: Result<T>): T => {
 
 export const expectResultError = <T>(
   result: Result<T>,
-  errorCode?: CofhejsErrorCode,
+  errorCode?: FHEErrorCode,
   errorMessage?: string,
 ): void => {
   expect(result.success).toBe(false);
   expect(result.data).toBe(null);
   expect(result.error).not.toBe(null);
-  const error = result.error as CofhejsError;
-  expect(error).toBeInstanceOf(CofhejsError);
+  const error = result.error as FHEError;
+  expect(error).toBeInstanceOf(FHEError);
   if (errorCode) {
     expect(error.code).toBe(errorCode);
   }
@@ -150,7 +150,7 @@ export const expectResultError = <T>(
 
 export const expectResultErrorCode = <T>(
   result: Result<T>,
-  errorCode: CofhejsErrorCode,
+  errorCode: FHEErrorCode,
 ): void => {
   expectResultError(result, errorCode);
 };
@@ -162,7 +162,7 @@ export const expectResultErrorMessage = <T>(
   expect(result.success).toBe(false);
   expect(result.data).toBe(null);
   expect(result.error).not.toBe(null);
-  const error = result.error as CofhejsError;
-  expect(error).toBeInstanceOf(CofhejsError);
+  const error = result.error as FHEError;
+  expect(error).toBeInstanceOf(FHEError);
   expect(error.message).toBe(errorMessage);
 };

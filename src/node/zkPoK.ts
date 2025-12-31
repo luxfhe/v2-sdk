@@ -4,7 +4,7 @@ import {
   CompactPkeCrs,
   ProvenCompactCiphertextList,
   ZkComputeLoad,
-} from "node-tfhe";
+} from "@luxfhe/wasm/node";
 import {
   MAX_UINT8,
   MAX_UINT16,
@@ -21,8 +21,8 @@ import {
   toHexString,
 } from "../core/utils/utils";
 import {
-  CofhejsError,
-  CofhejsErrorCode,
+  FHEError,
+  FHEErrorCode,
   EncryptableItem,
   FheTypes,
   VerifyResult,
@@ -156,8 +156,8 @@ export const zkVerify = async (
     if (!response.ok) {
       // Get the response body as text for better error details
       const errorBody = await response.text();
-      throw new CofhejsError({
-        code: CofhejsErrorCode.ZkVerifyFailed,
+      throw new FHEError({
+        code: FHEErrorCode.ZkVerifyFailed,
         message: `HTTP error! ZK proof verification failed - ${errorBody}`,
       });
     }
@@ -166,8 +166,8 @@ export const zkVerify = async (
       await response.json();
 
     if (json.status !== "success") {
-      throw new CofhejsError({
-        code: CofhejsErrorCode.ZkVerifyFailed,
+      throw new FHEError({
+        code: FHEErrorCode.ZkVerifyFailed,
         message: `ZK proof verification response malformed - ${json.error}`,
       });
     }
@@ -179,8 +179,8 @@ export const zkVerify = async (
       };
     });
   } catch (e) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.ZkVerifyFailed,
+    throw new FHEError({
+      code: FHEErrorCode.ZkVerifyFailed,
       message: `ZK proof verification failed`,
       cause: e instanceof Error ? e : undefined,
     });

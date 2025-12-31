@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export enum CofhejsErrorCode {
+export enum FHEErrorCode {
   InternalError = "INTERNAL_ERROR",
   UnknownEnvironment = "UNKNOWN_ENVIRONMENT",
   InitTfheFailed = "INIT_TFHE_FAILED",
@@ -31,8 +31,8 @@ export enum CofhejsErrorCode {
   ZkVerifierUrlUninitialized = "ZK_VERIFIER_URL_UNINITIALIZED",
 }
 
-export class CofhejsError extends Error {
-  public readonly code: CofhejsErrorCode;
+export class FHEError extends Error {
+  public readonly code: FHEErrorCode;
   public readonly cause?: Error;
 
   constructor({
@@ -40,18 +40,17 @@ export class CofhejsError extends Error {
     message,
     cause,
   }: {
-    code: CofhejsErrorCode;
+    code: FHEErrorCode;
     message: string;
     cause?: Error;
   }) {
     super(message);
-    this.name = "CofhejsError";
+    this.name = "FHEError";
     this.code = code;
     this.cause = cause;
 
-    // Maintains proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, CofhejsError);
+      Error.captureStackTrace(this, FHEError);
     }
   }
 
@@ -66,9 +65,9 @@ export class CofhejsError extends Error {
 
 export type Result<T> =
   | { success: true; data: T; error: null }
-  | { success: false; data: null; error: CofhejsError };
+  | { success: false; data: null; error: FHEError };
 
-export const ResultErr = <T>(error: CofhejsError): Result<T> => ({
+export const ResultErr = <T>(error: FHEError): Result<T> => ({
   success: false,
   data: null,
   error,
@@ -80,18 +79,18 @@ export const ResultOk = <T>(data: T): Result<T> => ({
   error: null,
 });
 
-export const isCofhejsError = (error: unknown): error is CofhejsError => {
-  if (error instanceof CofhejsError) return true;
+export const isFHEError = (error: unknown): error is FHEError => {
+  if (error instanceof FHEError) return true;
   return false;
 };
 
 export const ResultErrOrInternal = <T>(error: unknown): Result<T> => {
-  if (isCofhejsError(error)) {
+  if (isFHEError(error)) {
     return ResultErr(error);
   }
   return ResultErr(
-    new CofhejsError({
-      code: CofhejsErrorCode.InternalError,
+    new FHEError({
+      code: FHEErrorCode.InternalError,
       message: "An internal error occurred",
       cause: error instanceof Error ? error : undefined,
     }),
@@ -127,23 +126,23 @@ export const ResultHttpError = (
   error: unknown,
   url: string,
   status?: number,
-): CofhejsError => {
-  if (error instanceof CofhejsError) return error;
+): FHEError => {
+  if (error instanceof FHEError) return error;
 
   const message = status
     ? `HTTP error ${status} from ${url}`
     : `HTTP request failed for ${url}`;
 
-  return new CofhejsError({
-    code: CofhejsErrorCode.InternalError,
+  return new FHEError({
+    code: FHEErrorCode.InternalError,
     message,
     cause: error instanceof Error ? error : undefined,
   });
 };
 
-export const ResultValidationError = (message: string): CofhejsError => {
-  return new CofhejsError({
-    code: CofhejsErrorCode.InvalidPermitData,
+export const ResultValidationError = (message: string): FHEError => {
+  return new FHEError({
+    code: FHEErrorCode.InvalidPermitData,
     message,
   });
 };

@@ -1,7 +1,7 @@
 {
-  "name": "@luxfhe/v2-sdk",
-  "version": "0.5.0",
-  "description": "Lux FHE v2 SDK - Network-based Threshold TFHE with decentralized decryption",
+  "name": "@luxfhe/sdk",
+  "version": "0.5.1",
+  "description": "LuxFHE SDK - Network-based Threshold TFHE with decentralized decryption",
   "exports": {
     "./web": {
       "types": "./dist/web.d.ts",
@@ -50,20 +50,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luxfhe/v2-sdk.git"
+    "url": "git+https://github.com/luxfi/luxfhe.git"
   },
-  "author": "Lux Partners",
+  "author": "Lux Industries Inc",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/luxfhe/v2-sdk/issues"
+    "url": "https://github.com/luxfi/luxfhe/issues"
   },
-  "homepage": "https://github.com/luxfhe/v2-sdk#readme",
+  "homepage": "https://github.com/luxfi/luxfhe#readme",
   "dependencies": {
+    "@luxfhe/wasm": "^0.1.2",
     "@types/node": "^22.0.0",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
-    "node-tfhe": "1.4.0-alpha.3",
-    "tfhe": "1.4.0-alpha.3",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
     "type-fest": "^4.35.0",
@@ -87,7 +86,7 @@
     "ts-node": "10.9.2",
     "tsup": "^8.5.0",
     "typedoc": "0.28.6",
-    "typedoc-plugin-extras": "3.2.0",
+    "typedoc-plugin-extras": "4.0.1",
     "typescript": "5.9.3",
     "uglify-js": "3.19.3",
     "vite": "7.3.0",

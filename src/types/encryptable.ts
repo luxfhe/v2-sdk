@@ -1,14 +1,14 @@
 import { Primitive, LiteralToPrimitive } from "type-fest";
 import { FheAllUTypes, FheTypes } from "./base";
 import {
-  CoFheInBool,
-  CoFheInUint8,
-  CoFheInUint16,
-  CoFheInUint32,
-  CoFheInUint64,
-  CoFheInUint128,
-  CoFheInUint256,
-  CoFheInAddress,
+  FHEInBool,
+  FHEInUint8,
+  FHEInUint16,
+  FHEInUint32,
+  FHEInUint64,
+  FHEInUint128,
+  FHEInUint256,
+  FHEInAddress,
 } from "./encrypted";
 
 export type EncryptableBool = {
@@ -73,30 +73,30 @@ export type EncryptableItem =
   | EncryptableUint256
   | EncryptableAddress;
 
-// COFHE Encrypt
-export type Encryptable_CoFheInItem_Map<E extends EncryptableItem> =
+// FHE Encrypt
+export type Encryptable_FHEInItem_Map<E extends EncryptableItem> =
   E extends EncryptableBool
-    ? CoFheInBool
+    ? FHEInBool
     : E extends EncryptableUint8
-      ? CoFheInUint8
+      ? FHEInUint8
       : E extends EncryptableUint16
-        ? CoFheInUint16
+        ? FHEInUint16
         : E extends EncryptableUint32
-          ? CoFheInUint32
+          ? FHEInUint32
           : E extends EncryptableUint64
-            ? CoFheInUint64
+            ? FHEInUint64
             : E extends EncryptableUint128
-              ? CoFheInUint128
+              ? FHEInUint128
               : E extends EncryptableUint256
-                ? CoFheInUint256
+                ? FHEInUint256
                 : E extends EncryptableAddress
-                  ? CoFheInAddress
+                  ? FHEInAddress
                   : never;
 
 export type Encrypted_Inputs<T> = T extends Primitive
   ? LiteralToPrimitive<T>
   : T extends EncryptableItem
-    ? Encryptable_CoFheInItem_Map<T>
+    ? Encryptable_FHEInItem_Map<T>
     : {
         [K in keyof T]: Encrypted_Inputs<T[K]>;
       };

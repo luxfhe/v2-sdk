@@ -3,17 +3,17 @@ export const setup = async () => {
     return;
   }
 
-  // await Promise.all([runZkVerifierContainer(), runCoFheContainers()]);
+  // await Promise.all([runZkVerifierContainer(), runFHEContainers()]);
   // await runZkVerifierContainer();
 
-  console.log("\nWaiting for zk verifier / CoFHE to start...");
+  console.log("\nWaiting for zk verifier / LuxFHE to start...");
 
   await Promise.all([
     // waitForZkVerifierToStart(TEST_ZK_VERIFIER_URL),
-    // waitForCoFheContainersToStart(),
+    // waitForFHEContainersToStart(),
   ]);
 
-  console.log("zk verifier & CoFHE running!");
+  console.log("zk verifier & LuxFHE running!");
 };
 
 // this is a cjs because jest sucks at typescript
@@ -24,7 +24,7 @@ export const teardown = async () => {
   }
   console.log("\nWaiting for containers to stop...");
 
-  // await Promise.all([killZkVerifierContainer(), stopCoFheContainers(true)]);
+  // await Promise.all([killZkVerifierContainer(), stopFHEContainers(true)]);
 
   console.log("Stopped test container. Goodbye!");
 };

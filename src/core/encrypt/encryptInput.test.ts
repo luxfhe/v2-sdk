@@ -10,8 +10,8 @@ import {
   FheTypes,
   Result,
   VerifyResult,
-  CofhejsErrorCode,
-  CofhejsError,
+  FHEErrorCode,
+  FHEError,
 } from "../../types";
 import { ZkPackProveVerify } from "./zkPackProveVerify";
 
@@ -102,14 +102,14 @@ export const expectResultSuccess = <T>(result: Result<T>): T => {
 
 export const expectResultError = <T>(
   result: Result<T>,
-  errorCode?: CofhejsErrorCode,
+  errorCode?: FHEErrorCode,
   errorMessage?: string,
 ): void => {
   expect(result.success).toBe(false);
   expect(result.data).toBe(null);
   expect(result.error).not.toBe(null);
-  const error = result.error as CofhejsError;
-  expect(error).toBeInstanceOf(CofhejsError);
+  const error = result.error as FHEError;
+  expect(error).toBeInstanceOf(FHEError);
   if (errorCode) {
     expect(error.code).toBe(errorCode);
   }
@@ -413,11 +413,9 @@ describe("EncryptInputsBuilder", () => {
       });
 
       const result = await builder.encrypt();
-      expectResultError(
-        result,
-        CofhejsErrorCode.InternalError,
-        "ZK pack failed",
-      );
+      expectResultError(result, FHEErrorCode.InternalError);
+      // Original error is wrapped - check cause contains original message
+      expect((result.error as FHEError).cause?.message).toBe("ZK pack failed");
     });
 
     it("should handle ZK prove errors gracefully", async () => {
@@ -426,11 +424,9 @@ describe("EncryptInputsBuilder", () => {
       });
 
       const result = await builder.encrypt();
-      expectResultError(
-        result,
-        CofhejsErrorCode.InternalError,
-        "ZK prove failed",
-      );
+      expectResultError(result, FHEErrorCode.InternalError);
+      // Original error is wrapped - check cause contains original message
+      expect((result.error as FHEError).cause?.message).toBe("ZK prove failed");
     });
 
     it("should handle ZK verify errors gracefully", async () => {
@@ -439,11 +435,9 @@ describe("EncryptInputsBuilder", () => {
       });
 
       const result = await builder.encrypt();
-      expectResultError(
-        result,
-        CofhejsErrorCode.InternalError,
-        "ZK verify failed",
-      );
+      expectResultError(result, FHEErrorCode.InternalError);
+      // Original error is wrapped - check cause contains original message
+      expect((result.error as FHEError).cause?.message).toBe("ZK verify failed");
     });
   });
 

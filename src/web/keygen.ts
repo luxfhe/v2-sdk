@@ -1,4 +1,4 @@
-import { TfheClientKey, TfheCompactPublicKey, TfheConfigBuilder } from "tfhe";
+import { TfheClientKey, TfheCompactPublicKey, TfheConfigBuilder } from "@luxfhe/wasm";
 import { toHexString } from "../core/utils";
 
 export const createTfheKeypair = () => {

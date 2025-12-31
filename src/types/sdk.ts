@@ -20,12 +20,12 @@ export type Environment = "MOCK" | "LOCAL" | "TESTNET" | "MAINNET";
 
 export type EnvironmentParams = {
   environment?: Environment;
-  coFheUrl?: string;
+  fheUrl?: string;
   verifierUrl?: string;
   thresholdNetworkUrl?: string;
 };
 
-export type CofhejsMocksConfig = {
+export type LuxFHEMocksConfig = {
   decryptDelay?: number;
   zkvSigner?: AbstractSigner;
 };
@@ -34,10 +34,10 @@ export type InitializationParams = {
   provider: AbstractProvider;
   signer?: AbstractSigner;
   securityZones?: number[];
-  coFheUrl?: string;
+  fheUrl?: string;
   verifierUrl?: string;
   thresholdNetworkUrl?: string;
   tfhePublicKeySerializer: (buff: Uint8Array) => void;
   compactPkeCrsSerializer: (buff: Uint8Array) => void;
-  mockConfig?: CofhejsMocksConfig;
+  mockConfig?: LuxFHEMocksConfig;
 };

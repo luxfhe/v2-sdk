@@ -43,7 +43,7 @@ const getStorage = () => {
         const path = await import("path");
         const storageDir = path.join(
           process.env.HOME || process.env.USERPROFILE || ".",
-          ".cofhejs",
+          ".luxfhe",
         );
         await fs.promises.mkdir(storageDir, { recursive: true });
         const filePath = path.join(storageDir, `${name}.json`);
@@ -64,7 +64,7 @@ const getStorage = () => {
         const path = await import("path");
         const storageDir = path.join(
           process.env.HOME || process.env.USERPROFILE || ".",
-          ".cofhejs",
+          ".luxfhe",
         );
         await fs.promises.mkdir(storageDir, { recursive: true });
         const filePath = path.join(storageDir, `${name}.json`);
@@ -82,7 +82,7 @@ const getStorage = () => {
         const path = await import("path");
         const storageDir = path.join(
           process.env.HOME || process.env.USERPROFILE || ".",
-          ".cofhejs",
+          ".luxfhe",
         );
         const filePath = path.join(storageDir, `${name}.json`);
         await fs.promises.unlink(filePath).catch(() => {});
@@ -137,7 +137,7 @@ export const _keysStore = createStore<KeysStore>()(
       crs: {},
     }),
     {
-      name: "cofhejs-keys",
+      name: "luxfhe-keys",
       storage: createJSONStorage(() => getStorage()),
     },
   ),
@@ -153,7 +153,7 @@ export type SdkStore = SdkStoreProviderInitialization &
 
     securityZones: number[];
 
-    coFheUrl: string | undefined;
+    fheUrl: string | undefined;
     verifierUrl: string | undefined;
     thresholdNetworkUrl: string | undefined;
 
@@ -173,7 +173,7 @@ export const _sdkStore = createStore<SdkStore>(
 
       securityZones: [0],
 
-      coFheUrl: undefined,
+      fheUrl: undefined,
       verifierUrl: undefined,
       thresholdNetworkUrl: undefined,
       providerInitialized: false,
@@ -244,7 +244,7 @@ export const _store_initialize = async (params: InitializationParams) => {
     securityZones = [0],
     tfhePublicKeySerializer,
     compactPkeCrsSerializer,
-    coFheUrl,
+    fheUrl,
     verifierUrl,
     thresholdNetworkUrl,
     mockConfig,
@@ -253,7 +253,7 @@ export const _store_initialize = async (params: InitializationParams) => {
   _sdkStore.setState({
     providerInitialized: false,
     signerInitialized: false,
-    coFheUrl,
+    fheUrl,
     verifierUrl,
     thresholdNetworkUrl,
     mockConfig: {
@@ -315,7 +315,7 @@ export const _store_initialize = async (params: InitializationParams) => {
     });
   }
 
-  // If chainId, securityZones, or CoFhe enabled changes, update the store and update fheKeys for re-initialization
+  // If chainId, securityZones, or FHE server changes, update the store and update fheKeys for re-initialization
   const securityZonesChanged =
     securityZones !== _sdkStore.getState().securityZones;
   if (chainIdChanged || securityZonesChanged) {
@@ -358,19 +358,19 @@ export const _store_fetchKeys = async (
 ) => {
   const storedKey = _store_getFheKey(chainId, securityZone);
   if (storedKey != null && !forceFetch) return;
-  const coFheUrl = _sdkStore.getState().coFheUrl;
-  if (coFheUrl == null || typeof coFheUrl !== "string") {
+  const fheUrl = _sdkStore.getState().fheUrl;
+  if (fheUrl == null || typeof fheUrl !== "string") {
     throw new Error(
-      "Error initializing cofhejs; coFheUrl invalid, ensure it is set in `cofhejs.initialize`",
+      "Error initializing LuxFHE; fheUrl invalid, ensure it is set in `luxfhe.initialize`",
     );
   }
 
   let pk_data: string | undefined = undefined;
   let crs_data: string | undefined = undefined;
 
-  // Fetch publicKey from CoFhe
+  // Fetch publicKey from FHE server
   try {
-    const pk_res = await fetch(`${coFheUrl}/GetNetworkPublicKey`, {
+    const pk_res = await fetch(`${fheUrl}/GetNetworkPublicKey`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -380,12 +380,12 @@ export const _store_fetchKeys = async (
     pk_data = (await pk_res.json()).publicKey;
   } catch (err) {
     throw new Error(
-      `Error initializing cofhejs; fetching FHE publicKey from CoFHE failed with error ${err}`,
+      `Error initializing LuxFHE; fetching FHE publicKey from server failed with error ${err}`,
     );
   }
 
   try {
-    const crs_res = await fetch(`${coFheUrl}/GetCrs`, {
+    const crs_res = await fetch(`${fheUrl}/GetCrs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -395,31 +395,31 @@ export const _store_fetchKeys = async (
     crs_data = (await crs_res.json()).crs;
   } catch (err) {
     throw new Error(
-      `Error initializing cofhejs; fetching CRS from CoFHE failed with error ${err}`,
+      `Error initializing LuxFHE; fetching CRS from server failed with error ${err}`,
     );
   }
 
   if (pk_data == null || typeof pk_data !== "string") {
     throw new Error(
-      `Error initializing cofhejs; FHE publicKey fetched from CoFHE invalid: missing or not a string`,
+      `Error initializing LuxFHE; FHE publicKey fetched from server invalid: missing or not a string`,
     );
   }
 
   if (pk_data === "0x") {
     throw new Error(
-      "Error initializing cofhejs; provided chain is not FHE enabled, no FHE publicKey found",
+      "Error initializing LuxFHE; provided chain is not FHE enabled, no FHE publicKey found",
     );
   }
 
   if (pk_data.length < PUBLIC_KEY_LENGTH_MIN) {
     throw new Error(
-      `Error initializing cofhejs; got shorter than expected FHE publicKey: ${pk_data.length}. Expected length >= ${PUBLIC_KEY_LENGTH_MIN}`,
+      `Error initializing LuxFHE; got shorter than expected FHE publicKey: ${pk_data.length}. Expected length >= ${PUBLIC_KEY_LENGTH_MIN}`,
     );
   }
 
   if (crs_data == null || typeof crs_data !== "string") {
     throw new Error(
-      `Error initializing cofhejs; CRS fetched from CoFHE invalid: missing or not a string`,
+      `Error initializing LuxFHE; CRS fetched from server invalid: missing or not a string`,
     );
   }
 

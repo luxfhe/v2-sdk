@@ -25,7 +25,7 @@ describe("Store Node.js Tests", () => {
 
   beforeEach(async () => {
     // Create a temporary directory for testing
-    testStorageDir = join(tmpdir(), `cofhejs-test-${Date.now()}`);
+    testStorageDir = join(tmpdir(), `fhe-test-${Date.now()}`);
 
     // Mock HOME environment variable to use our test directory
     originalHome = process.env.HOME;
@@ -36,7 +36,7 @@ describe("Store Node.js Tests", () => {
     _sdkStore.setState({
       fheKeysInitialized: false,
       securityZones: [0],
-      coFheUrl: undefined,
+      fheUrl: undefined,
       verifierUrl: undefined,
       thresholdNetworkUrl: undefined,
       providerInitialized: false,
@@ -72,7 +72,7 @@ describe("Store Node.js Tests", () => {
 
     // Clean up test directory
     try {
-      await fs.rm(join(testStorageDir, ".cofhejs"), {
+      await fs.rm(join(testStorageDir, ".luxfhe"), {
         recursive: true,
         force: true,
       });
@@ -107,8 +107,8 @@ describe("Store Node.js Tests", () => {
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       // Verify file was created
-      const storageDir = join(testStorageDir, ".cofhejs");
-      const filePath = join(storageDir, "cofhejs-keys.json");
+      const storageDir = join(testStorageDir, ".luxfhe");
+      const filePath = join(storageDir, "luxfhe-keys.json");
 
       const exists = await fs
         .access(filePath)
@@ -147,9 +147,9 @@ describe("Store Node.js Tests", () => {
       const mockCrs = new Uint8Array([60, 70, 80, 90, 100]);
 
       // First, create the storage file manually with the correct serialization format
-      const storageDir = join(testStorageDir, ".cofhejs");
+      const storageDir = join(testStorageDir, ".luxfhe");
       await fs.mkdir(storageDir, { recursive: true });
-      const filePath = join(storageDir, "cofhejs-keys.json");
+      const filePath = join(storageDir, "luxfhe-keys.json");
 
       // Create the data in the format that Zustand persistence expects
       const persistedData = {
@@ -262,7 +262,7 @@ describe("Store Node.js Tests", () => {
         signerInitialized: true,
         signer: mockSigner,
         account: "0x1234567890123456789012345678901234567890",
-        coFheUrl: "http://127.0.0.1",
+        fheUrl: "http://127.0.0.1",
         verifierUrl: undefined,
         thresholdNetworkUrl: undefined,
         mockConfig: {
@@ -311,7 +311,7 @@ describe("Store Node.js Tests", () => {
         securityZones: [0, 1],
         tfhePublicKeySerializer: vi.fn(),
         compactPkeCrsSerializer: vi.fn(),
-        coFheUrl: "http://127.0.0.1",
+        fheUrl: "http://127.0.0.1",
         verifierUrl: undefined,
         thresholdNetworkUrl: undefined,
         zkvSigner: mockSigner,
@@ -354,14 +354,14 @@ describe("Store Node.js Tests", () => {
       expect(sdkState.signerInitialized).toBe(true);
       expect(sdkState.chainId).toBe("420105");
       expect(sdkState.securityZones).toEqual([0, 1]);
-      expect(sdkState.coFheUrl).toBe("http://127.0.0.1");
+      expect(sdkState.fheUrl).toBe("http://127.0.0.1");
     });
 
     it("should handle rehydration of keys store during initialization", async () => {
       // Pre-populate the storage file
-      const storageDir = join(testStorageDir, ".cofhejs");
+      const storageDir = join(testStorageDir, ".luxfhe");
       await fs.mkdir(storageDir, { recursive: true });
-      const filePath = join(storageDir, "cofhejs-keys.json");
+      const filePath = join(storageDir, "luxfhe-keys.json");
 
       const persistedData = {
         state: {
@@ -441,8 +441,8 @@ describe("Store Node.js Tests", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify file was created in USERPROFILE location
-      const storageDir = join(testStorageDir, ".cofhejs");
-      const filePath = join(storageDir, "cofhejs-keys.json");
+      const storageDir = join(testStorageDir, ".luxfhe");
+      const filePath = join(storageDir, "luxfhe-keys.json");
 
       const exists = await fs
         .access(filePath)
@@ -502,8 +502,8 @@ describe("Store Node.js Tests", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify data persisted correctly
-      const storageDir = join(testStorageDir, ".cofhejs");
-      const filePath = join(storageDir, "cofhejs-keys.json");
+      const storageDir = join(testStorageDir, ".luxfhe");
+      const filePath = join(storageDir, "luxfhe-keys.json");
 
       const fileContent = await fs.readFile(filePath, "utf8");
       const parsedData = JSON.parse(fileContent);

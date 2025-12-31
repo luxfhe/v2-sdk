@@ -3,7 +3,7 @@ import {
   CompactCiphertextListBuilder,
   CompactPkeCrs,
   TfheCompactPublicKey,
-} from "tfhe";
+} from "@luxfhe/wasm";
 import {
   createPermit,
   encryptExtract,
@@ -22,9 +22,9 @@ import {
 import { Permit } from "../core/permit";
 import { _sdkStore } from "../core/sdk/store";
 import {
-  CoFheInItem,
-  CofhejsError,
-  CofhejsErrorCode,
+  FHEInItem,
+  FHEError,
+  FHEErrorCode,
   EncryptableItem,
   Encrypted_Inputs,
   EncryptStep,
@@ -52,7 +52,7 @@ import { EncryptInputsBuilder } from "../core/encrypt/encryptInput";
 import { ZkPackProveVerify } from "../core/encrypt/zkPackProveVerify";
 
 /**
- * Initializes the `cofhejs` to enable encrypting input data, creating permits / permissions, and decrypting sealed outputs.
+ * Initializes the `fhejs` to enable encrypting input data, creating permits / permissions, and decrypting sealed outputs.
  * Initializes `fhevm` client FHE wasm module and fetches the provided chain's FHE publicKey.
  * If a valid signer is provided, a `permit/permission` is generated automatically
  */
@@ -74,8 +74,8 @@ export const initialize = async (
     if (processedParams.ignoreErrors) {
       return undefined;
     } else {
-      throw new CofhejsError({
-        code: CofhejsErrorCode.InitTfheFailed,
+      throw new FHEError({
+        code: FHEErrorCode.InitTfheFailed,
         message: `initializing TFHE failed - is the network FHE-enabled?`,
         cause: err instanceof Error ? err : undefined,
       });
@@ -198,7 +198,7 @@ async function encrypt<T extends any[]>(
       chainId,
     );
 
-    const inItems: CoFheInItem[] = verifyResults.map(
+    const inItems: FHEInItem[] = verifyResults.map(
       ({ ct_hash, signature }, index) => ({
         ctHash: BigInt(ct_hash),
         securityZone,
@@ -215,8 +215,8 @@ async function encrypt<T extends any[]>(
     );
 
     if (remainingInItems.length !== 0)
-      throw new CofhejsError({
-        code: CofhejsErrorCode.EncryptRemainingInItems,
+      throw new FHEError({
+        code: FHEErrorCode.EncryptRemainingInItems,
         message: "Some encrypted inputs remaining after replacement",
       });
 
@@ -236,7 +236,7 @@ async function encrypt<T extends any[]>(
  *
  * @example
  * ```typescript
- * const encrypted = await cofhejs
+ * const encrypted = await fhe
  *   .encryptInputs([Encryptable.uint128(value)])
  *   .setSender(paymasterData.address)
  *   .setSecurityZone(0)
@@ -282,7 +282,7 @@ export function encryptInputs<T extends any[]>(
   });
 }
 
-export const cofhejs = {
+export const fhe = {
   store: _sdkStore,
   initialize: wrapFunctionAsync(initialize),
   initializeWithViem: wrapFunctionAsync(initializeWithViem),

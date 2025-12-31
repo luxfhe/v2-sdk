@@ -16,14 +16,14 @@ import { afterEach } from "vitest";
 import { ethers, getAddress, hexlify } from "ethers";
 import {
   Encryptable,
-  CoFheInUint64,
-  CoFheInAddress,
-  CoFheInBool,
-  CoFheInUint8,
+  FHEInUint64,
+  FHEInAddress,
+  FHEInBool,
+  FHEInUint8,
   FheTypes,
   EncryptStep,
 } from "../src/types";
-import { cofhejs, createTfhePublicKey, Permit, SealingKey } from "../src/node";
+import { fhe, createTfhePublicKey, Permit, SealingKey } from "../src/node";
 import { _permitStore, permitStore } from "../src/core/permit/store";
 
 describe("Mocks (Hardhat Node) Tests", () => {
@@ -45,7 +45,7 @@ describe("Mocks (Hardhat Node) Tests", () => {
   const hardhatChainId = 31337n;
 
   const initSdkWithBob = async () => {
-    return cofhejs.initialize({
+    return fhe.initialize({
       provider: bobProvider,
       signer: bobSigner,
       environment: "MOCK",
@@ -56,7 +56,7 @@ describe("Mocks (Hardhat Node) Tests", () => {
     });
   };
   const initSdkWithAda = async () => {
-    return cofhejs.initialize({
+    return fhe.initialize({
       provider: adaProvider,
       signer: adaSigner,
       environment: "MOCK",
@@ -89,12 +89,12 @@ describe("Mocks (Hardhat Node) Tests", () => {
     adaAddress = await adaSigner.getAddress();
 
     localStorage.clear();
-    cofhejs.store.setState(cofhejs.store.getInitialState());
+    fhe.store.setState(fhe.store.getInitialState());
   });
 
   afterEach(() => {
     localStorage.clear();
-    cofhejs.store.setState(cofhejs.store.getInitialState());
+    fhe.store.setState(fhe.store.getInitialState());
     permitStore.store.setState(permitStore.store.getInitialState());
   });
 
@@ -103,14 +103,14 @@ describe("Mocks (Hardhat Node) Tests", () => {
   });
 
   it("initialize", async () => {
-    expect(cofhejs.store.getState().providerInitialized).toEqual(false);
-    expect(cofhejs.store.getState().signerInitialized).toEqual(false);
-    expect(cofhejs.store.getState().fheKeysInitialized).toEqual(false);
+    expect(fhe.store.getState().providerInitialized).toEqual(false);
+    expect(fhe.store.getState().signerInitialized).toEqual(false);
+    expect(fhe.store.getState().fheKeysInitialized).toEqual(false);
 
     await initSdkWithBob();
-    expect(cofhejs.store.getState().providerInitialized).toEqual(true);
-    expect(cofhejs.store.getState().signerInitialized).toEqual(true);
-    expect(cofhejs.store.getState().fheKeysInitialized).toEqual(true);
+    expect(fhe.store.getState().providerInitialized).toEqual(true);
+    expect(fhe.store.getState().signerInitialized).toEqual(true);
+    expect(fhe.store.getState().fheKeysInitialized).toEqual(true);
   });
 
   it("re-initialize (change account)", async () => {
@@ -118,14 +118,14 @@ describe("Mocks (Hardhat Node) Tests", () => {
 
     // Bob's new permit is the active permit
 
-    const bobFetchedPermit = expectResultSuccess(await cofhejs.getPermit());
+    const bobFetchedPermit = expectResultSuccess(await fhe.getPermit());
     expect(bobFetchedPermit.getHash()).toEqual(bobPermit?.getHash());
 
     const adaPermit = expectResultSuccess(await initSdkWithAda());
 
     // Ada does not have an active permit
 
-    const adaFetchedPermit = expectResultSuccess(await cofhejs.getPermit());
+    const adaFetchedPermit = expectResultSuccess(await fhe.getPermit());
     expect(adaFetchedPermit.getHash()).toEqual(adaPermit?.getHash());
 
     // Switch back to bob
@@ -138,7 +138,7 @@ describe("Mocks (Hardhat Node) Tests", () => {
   it("encrypt", { timeout: 320000 }, async () => {
     await initSdkWithBob();
 
-    await cofhejs.createPermit({
+    await fhe.createPermit({
       type: "self",
       issuer: bobAddress,
     });
@@ -147,7 +147,7 @@ describe("Mocks (Hardhat Node) Tests", () => {
       console.log(`Log Encrypt State :: ${state}`);
     };
 
-    const nestedEncrypt = await cofhejs.encrypt(
+    const nestedEncrypt = await fhe.encrypt(
       [
         { a: Encryptable.bool(false), b: Encryptable.uint64(10n), c: "hello" },
         ["hello", 20n, Encryptable.address(contractAddress)],
@@ -161,12 +161,12 @@ describe("Mocks (Hardhat Node) Tests", () => {
 
     type ExpectedEncryptedType = [
       {
-        readonly a: CoFheInBool;
-        readonly b: CoFheInUint64;
+        readonly a: FHEInBool;
+        readonly b: FHEInUint64;
         readonly c: string;
       },
-      Readonly<[string, bigint, CoFheInAddress]>,
-      CoFheInUint8,
+      Readonly<[string, bigint, FHEInAddress]>,
+      FHEInUint8,
     ];
 
     console.log("bob address", bobAddress);
@@ -182,7 +182,7 @@ describe("Mocks (Hardhat Node) Tests", () => {
     };
 
     const inEncryptUint32 = expectResultSuccess(
-      await cofhejs.encrypt([Encryptable.uint32(25n)] as const, logState),
+      await fhe.encrypt([Encryptable.uint32(25n)] as const, logState),
     )[0];
 
     console.log("inEncryptUint32", inEncryptUint32);
@@ -258,13 +258,13 @@ describe("Mocks (Hardhat Node) Tests", () => {
     console.log("ctHash", ctHash);
 
     expectResultSuccess(
-      await cofhejs.createPermit({
+      await fhe.createPermit({
         type: "self",
         issuer: bobAddress,
       }),
     );
 
-    const unsealed = await cofhejs.unseal(ctHash, FheTypes.Uint32);
+    const unsealed = await fhe.unseal(ctHash, FheTypes.Uint32);
     console.log("unsealed", unsealed);
     if (unsealed.error != null) throw unsealed.error;
   });

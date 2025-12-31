@@ -8,7 +8,7 @@ export default defineConfig({
     node: "./src/node/index.ts",
   },
   format: ["cjs", "esm"],
-  dts: true,
+  dts: false,
   splitting: false,
   sourcemap: true,
   clean: false,
@@ -22,19 +22,6 @@ export default defineConfig({
   },
   async onSuccess() {
     console.log("@@@ SUCCESS @@@");
-    const tfheDir = path.resolve("node_modules/tfhe");
-    const destDir = path.resolve("dist");
-    if (!fs.existsSync(destDir)) {
-      fs.mkdirSync(destDir, { recursive: true });
-    }
-    
-    // Copy the tfhe.js file
-    fs.copyFileSync(
-      path.join(tfheDir, "tfhe.js"),
-      path.join(destDir, "tfhe.js")
-    );
-
-
   },
   outDir: "dist",
   treeshake: true,

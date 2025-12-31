@@ -2,7 +2,7 @@ import {
   TfheClientKey,
   TfheCompactPublicKey,
   TfheConfigBuilder,
-} from "node-tfhe";
+} from "@luxfhe/wasm/node";
 import { toHexString } from "../core/utils";
 
 export const createTfheKeypair = () => {

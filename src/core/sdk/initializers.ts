@@ -2,8 +2,8 @@
 import {
   AbstractProvider,
   AbstractSigner,
-  CofhejsError,
-  CofhejsErrorCode,
+  FHEError,
+  FHEErrorCode,
   Environment,
   InitializationParams,
 } from "../../types";
@@ -100,14 +100,14 @@ export async function getViemAbstractProviders(
   params: ViemInitializerParams,
 ): InitializerReturn {
   if (!params.viemClient) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InitViemFailed,
+    throw new FHEError({
+      code: FHEErrorCode.InitViemFailed,
       message: `Viem client not provided.`,
     });
   }
   if (!params.viemWalletClient) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InitViemFailed,
+    throw new FHEError({
+      code: FHEErrorCode.InitViemFailed,
       message: `Viem wallet client not provided.`,
     });
   }
@@ -133,8 +133,8 @@ export async function getViemAbstractProviders(
       zkvSigner,
     };
   } catch (error) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InitViemFailed,
+    throw new FHEError({
+      code: FHEErrorCode.InitViemFailed,
       message: `Failed to initialize with Viem.`,
       cause: error instanceof Error ? error : undefined,
     });
@@ -234,8 +234,8 @@ export async function getEthersAbstractProviders(
       zkvSigner,
     };
   } catch (error) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InitEthersFailed,
+    throw new FHEError({
+      code: FHEErrorCode.InitEthersFailed,
       message: `Failed to initialize with ethers.`,
       cause: error instanceof Error ? error : undefined,
     });

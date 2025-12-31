@@ -1,4 +1,4 @@
-name: localcoluxfhe
+name: localluxfhe
 version: "3.8"
 
 volumes:
@@ -6,19 +6,19 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ${KEYS_PATH:-./localcoluxfhe/keys}
+      device: ${KEYS_PATH:-./localluxfhe/keys}
       o: bind
   configs:
     driver: local
     driver_opts:
       type: none
-      device: ${CONFIG_DIR:-./localcoluxfhe/configs}
+      device: ${CONFIG_DIR:-./localluxfhe/configs}
       o: bind
 
 # Define a template for party member services
 x-party-member-template: &party-member-template
   build: .
-  image: ghcr.io/luxfheprotocol/threshold-network
+  image: ghcr.io/luxfi/node
   network_mode: "host"
   restart: unless-stopped
   command: partymember-service
@@ -33,7 +33,7 @@ x-party-member-template: &party-member-template
 
 services:
   preprocessor:
-    image: ghcr.io/luxfheprotocol/threshold-network
+    image: ghcr.io/luxfi/node
     container_name: preprocessor
     command: >
       sh -c "
@@ -50,21 +50,21 @@ services:
       - keys:/app/docker/test_data:rw
 
   host_chain:
-    image: ghcr.io/luxfheprotocol/nitro/localluxfhe:v0.3.2-alpha.17
+    image: ghcr.io/luxfi/node:latest
     ports:
       - "42069:8547"
       - "42070:8548"
       - "42000:3000"
 
   registry_chain:
-    image: ghcr.io/luxfheprotocol/nitro/localluxfhe:v0.3.2-alpha.17
+    image: ghcr.io/luxfi/node:latest
     ports:
       - "42169:8547"
       - "42170:8548"
       - "42100:3000"
 
-  fheos_server:
-    image: ghcr.io/luxfheprotocol/cofhe/fheos
+  fhe_server:
+    image: ghcr.io/luxfi/fhe/server
     network_mode: "host"
     ports:
       - "8448:8448" # External API
@@ -82,12 +82,12 @@ services:
         condition: service_completed_successfully
 
   middleware:
-    image: ghcr.io/luxfheprotocol/cofhe/middleware
+    image: ghcr.io/luxfi/fhe/gateway
     network_mode: "host"
     depends_on:
       - host_chain
       - registry_chain
-      - fheos_server
+      - fhe_server
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -105,7 +105,7 @@ services:
 
   coordinator:
     build: .
-    image: ghcr.io/luxfheprotocol/threshold-network
+    image: ghcr.io/luxfi/node
     container_name: coordinator
     network_mode: "host"
     ports:
@@ -120,7 +120,7 @@ services:
 
   dispatcher:
     build: .
-    image: ghcr.io/luxfheprotocol/threshold-network
+    image: ghcr.io/luxfi/node
     container_name: dispatcher
     network_mode: "host"
     ports:
@@ -165,7 +165,7 @@ services:
       - CONFIG_PATH=/app/configs/pm_config_04.toml
 
   zk-verifier:
-    image: ghcr.io/luxfheprotocol/zk-verifier
+    image: ghcr.io/luxfi/zk-verifier
     network_mode: "host"
     ports:
       - "3001:3001"

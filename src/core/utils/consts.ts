@@ -11,10 +11,10 @@ export const MAX_UINT256: bigint =
 
 export const FheOpsAddress = "0x0000000000000000000000000000000000000080";
 export const PUBLIC_KEY_LENGTH_MIN = 15_000;
-export const DEFAULT_COFHE_URL = "http://127.0.0.1";
+export const DEFAULT_FHE_URL = "http://127.0.0.1";
 
 // Addresses
-export const TaskManagerAddress = "0xeA30c4B8b44078Bbf8a6ef5b9f1eC1626C7848D9";
+export const FHENetworkAddress = "0xeA30c4B8b44078Bbf8a6ef5b9f1eC1626C7848D9";
 export const MockZkVerifierAddress =
   "0x0000000000000000000000000000000000000100";
 export const MockQueryDecrypterAddress =

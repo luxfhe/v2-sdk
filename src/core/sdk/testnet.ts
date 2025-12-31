@@ -5,10 +5,10 @@ import { encryptExtract, encryptReplace } from ".";
 import {
   AbstractProvider,
   AbstractSigner,
-  CoFheInItem,
-  CofhejsError,
-  CofhejsErrorCode,
-  CofhejsMocksConfig,
+  FHEInItem,
+  FHEError,
+  FHEErrorCode,
+  FHEMocksConfig,
   EncryptableItem,
   Encrypted_Inputs,
   EncryptSetStateFn,
@@ -64,7 +64,7 @@ export async function checkIsTestnet(
 }
 
 async function mockZkVerifySign(
-  mockConfig: CofhejsMocksConfig,
+  mockConfig: FHEMocksConfig,
   signer: AbstractSigner,
   provider: AbstractProvider,
   user: string,
@@ -125,8 +125,8 @@ async function mockZkVerifySign(
       data: insertPackedCtHashesCallData,
     });
   } catch (err) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.ZkVerifyInsertPackedCtHashesFailed,
+    throw new FHEError({
+      code: FHEErrorCode.ZkVerifyInsertPackedCtHashesFailed,
       message: `mockZkVerifySign insertPackedCtHashes failed: ${err}`,
       cause: err instanceof Error ? err : undefined,
     });
@@ -161,8 +161,8 @@ async function mockZkVerifySign(
 
     return results;
   } catch (err) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.ZkVerifySignFailed,
+    throw new FHEError({
+      code: FHEErrorCode.ZkVerifySignFailed,
       message: `mockZkVerifySign sign failed: ${err}`,
       cause: err instanceof Error ? err : undefined,
     });
@@ -179,26 +179,26 @@ export async function mockEncrypt<T extends any[]>(
   const state = _sdkStore.getState();
 
   if (state.account == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.AccountUninitialized,
+    throw new FHEError({
+      code: FHEErrorCode.AccountUninitialized,
       message: "Account uninitialized",
     });
 
   if (state.chainId == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.ChainIdUninitialized,
+    throw new FHEError({
+      code: FHEErrorCode.ChainIdUninitialized,
       message: "ChainId uninitialized",
     });
 
   if (state.provider == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.ProviderNotInitialized,
+    throw new FHEError({
+      code: FHEErrorCode.ProviderNotInitialized,
       message: "Provider uninitialized",
     });
 
   if (state.signer == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.SignerNotInitialized,
+    throw new FHEError({
+      code: FHEErrorCode.SignerNotInitialized,
       message: "Signer uninitialized",
     });
 
@@ -226,7 +226,7 @@ export async function mockEncrypt<T extends any[]>(
     securityZone,
   );
 
-  const inItems: CoFheInItem[] = signedResults.map(
+  const inItems: FHEInItem[] = signedResults.map(
     ({ ct_hash, signature }, index) => ({
       ctHash: BigInt(ct_hash),
       securityZone,
@@ -240,8 +240,8 @@ export async function mockEncrypt<T extends any[]>(
   const [preparedInputItems, remainingInItems] = encryptReplace(item, inItems);
 
   if (remainingInItems.length !== 0)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.EncryptRemainingInItems,
+    throw new FHEError({
+      code: FHEErrorCode.EncryptRemainingInItems,
       message: "Some encrypted inputs remaining after replacement",
     });
 
@@ -262,8 +262,8 @@ export async function mockSealOutput<U extends FheTypes>(
 
   const domainValid = await permit.checkSignedDomainValid(provider);
   if (!domainValid) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidPermitDomain,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidPermitDomain,
       message: "permit domain invalid",
     });
   }
@@ -288,15 +288,15 @@ export async function mockSealOutput<U extends FheTypes>(
     );
 
   if (error != "") {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.SealOutputFailed,
+    throw new FHEError({
+      code: FHEErrorCode.SealOutputFailed,
       message: `On-chain reversion: ${error}`,
     });
   }
 
   if (allowed == false) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.SealOutputFailed,
+    throw new FHEError({
+      code: FHEErrorCode.SealOutputFailed,
       message: `ACL Access Denied (NotAllowed)`,
     });
   }
@@ -306,8 +306,8 @@ export async function mockSealOutput<U extends FheTypes>(
   const unsealed = sealedBigInt ^ sealingKeyBigInt;
 
   if (!isValidUtype(utype)) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidUtype,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidUtype,
       message: `Invalid utype: ${utype}`,
     });
   }
@@ -327,8 +327,8 @@ export async function mockDecrypt<U extends FheTypes>(
 
   const domainValid = await permit.checkSignedDomainValid(provider);
   if (!domainValid) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidPermitDomain,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidPermitDomain,
       message: "permit domain invalid",
     });
   }
@@ -358,15 +358,15 @@ export async function mockDecrypt<U extends FheTypes>(
   }: { allowed: boolean; error: string; result: string } = decryptResult;
 
   if (error != null) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.DecryptFailed,
+    throw new FHEError({
+      code: FHEErrorCode.DecryptFailed,
       message: `On-chain reversion: ${error}`,
     });
   }
 
   if (allowed == false) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.DecryptFailed,
+    throw new FHEError({
+      code: FHEErrorCode.DecryptFailed,
       message: `ACL Access Denied (NotAllowed)`,
     });
   }
@@ -374,8 +374,8 @@ export async function mockDecrypt<U extends FheTypes>(
   const resultBigInt = BigInt(result);
 
   if (!isValidUtype(utype)) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidUtype,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidUtype,
       message: `Invalid utype: ${utype}`,
     });
   }

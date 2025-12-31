@@ -19,15 +19,15 @@ import {
   InitializationParams,
   Encryptable,
   Permission,
-  CoFheInUint64,
-  CoFheInAddress,
-  CoFheInBool,
-  CoFheInUint8,
+  FHEInUint64,
+  FHEInAddress,
+  FHEInBool,
+  FHEInUint8,
   FheTypes,
   EncryptStep,
-  CofhejsErrorCode,
+  FHEErrorCode,
 } from "../src/types";
-import { cofhejs, createTfhePublicKey, Permit, SealingKey } from "../src/node";
+import { fhe, createTfhePublicKey, Permit, SealingKey } from "../src/node";
 import { _permitStore, permitStore } from "../src/core/permit/store";
 import { bytesToBigInt } from "../src/core/utils";
 
@@ -53,7 +53,7 @@ describe("Sdk Tests", () => {
   const thresholdNetworkUrl = "http://127.0.0.1:3000";
 
   const initSdkWithBob = async () => {
-    return cofhejs.initialize({
+    return fhe.initialize({
       provider: bobProvider,
       signer: bobSigner,
       environment: "LOCAL",
@@ -64,7 +64,7 @@ describe("Sdk Tests", () => {
     });
   };
   const initSdkWithAda = async () => {
-    return cofhejs.initialize({
+    return fhe.initialize({
       provider: adaProvider,
       signer: adaSigner,
       environment: "LOCAL",
@@ -88,12 +88,12 @@ describe("Sdk Tests", () => {
     adaAddress = await adaSigner.getAddress();
 
     localStorage.clear();
-    cofhejs.store.setState(cofhejs.store.getInitialState());
+    fhe.store.setState(fhe.store.getInitialState());
   });
 
   afterEach(() => {
     localStorage.clear();
-    cofhejs.store.setState(cofhejs.store.getInitialState());
+    fhe.store.setState(fhe.store.getInitialState());
     permitStore.store.setState(permitStore.store.getInitialState());
   });
 
@@ -102,34 +102,34 @@ describe("Sdk Tests", () => {
   });
 
   it("initialize", async () => {
-    expect(cofhejs.store.getState().providerInitialized).toEqual(false);
-    expect(cofhejs.store.getState().signerInitialized).toEqual(false);
-    expect(cofhejs.store.getState().fheKeysInitialized).toEqual(false);
+    expect(fhe.store.getState().providerInitialized).toEqual(false);
+    expect(fhe.store.getState().signerInitialized).toEqual(false);
+    expect(fhe.store.getState().fheKeysInitialized).toEqual(false);
 
     await initSdkWithBob();
-    expect(cofhejs.store.getState().providerInitialized).toEqual(true);
-    expect(cofhejs.store.getState().signerInitialized).toEqual(true);
-    expect(cofhejs.store.getState().fheKeysInitialized).toEqual(true);
+    expect(fhe.store.getState().providerInitialized).toEqual(true);
+    expect(fhe.store.getState().signerInitialized).toEqual(true);
+    expect(fhe.store.getState().fheKeysInitialized).toEqual(true);
 
     expectResultError(
-      await cofhejs.initialize({
+      await fhe.initialize({
         target: "node",
         // provider: bobProvider,
         // signer: bobSigner,
         environment: "LOCAL",
       } as unknown as InitializationParams),
-      CofhejsErrorCode.MissingProviderParam,
+      FHEErrorCode.MissingProviderParam,
     );
 
     expectResultError(
-      await cofhejs.initialize({
+      await fhe.initialize({
         target: "node",
         provider: bobProvider,
         signer: bobSigner,
         securityZones: [],
         environment: "LOCAL",
       } as unknown as InitializationParams),
-      CofhejsErrorCode.EmptySecurityZonesParam,
+      FHEErrorCode.EmptySecurityZonesParam,
     );
   });
 
@@ -139,7 +139,7 @@ describe("Sdk Tests", () => {
     // Bob's new permit is the active permit
 
     let bobFetchedPermit: Permit | undefined = expectResultSuccess(
-      await cofhejs.getPermit(),
+      await fhe.getPermit(),
     );
     expect(bobFetchedPermit.getHash()).toEqual(bobPermit?.getHash());
 
@@ -147,7 +147,7 @@ describe("Sdk Tests", () => {
 
     // Ada does not have an active permit
 
-    const adaFetchedPermit = expectResultSuccess(await cofhejs.getPermit());
+    const adaFetchedPermit = expectResultSuccess(await fhe.getPermit());
     expect(adaFetchedPermit.getHash()).toEqual(adaPermit?.getHash());
 
     // Switch back to bob
@@ -161,7 +161,7 @@ describe("Sdk Tests", () => {
   // it("encrypt", async () => {
   //   await initSdkWithBob();
 
-  //   const nestedEncryptArr = await cofhejs.encrypt([
+  //   const nestedEncryptArr = await fhe.encrypt([
   //     Encryptable.uint8(8),
   //     Encryptable.uint64(64n),
   //     Encryptable.uint256(256n),
@@ -183,7 +183,7 @@ describe("Sdk Tests", () => {
   //   expect(nestedEncryptArr.data[1].utype).to.equal(FheUType.uint64);
   //   expect(nestedEncryptArr.data[2].utype).to.equal(FheUType.uint256);
 
-  //   const nestedEncryptObj = await cofhejs.encrypt({
+  //   const nestedEncryptObj = await fhe.encrypt({
   //     uint8: Encryptable.uint8(8),
   //     uint64: Encryptable.uint64(64n),
   //     uint256: Encryptable.uint256(256n),
@@ -210,7 +210,7 @@ describe("Sdk Tests", () => {
   it("encrypt (type check)", { timeout: 320000 }, async () => {
     await initSdkWithBob();
 
-    await cofhejs.createPermit({
+    await fhe.createPermit({
       type: "self",
       issuer: bobAddress,
     });
@@ -220,7 +220,7 @@ describe("Sdk Tests", () => {
     };
 
     try {
-      const nestedEncryptResult = await cofhejs.encrypt(
+      const nestedEncryptResult = await fhe.encrypt(
         [
           {
             a: Encryptable.bool(false),
@@ -238,12 +238,12 @@ describe("Sdk Tests", () => {
 
       type ExpectedEncryptedType = [
         {
-          readonly a: CoFheInBool;
-          readonly b: CoFheInUint64;
+          readonly a: FHEInBool;
+          readonly b: FHEInUint64;
           readonly c: string;
         },
-        Readonly<[string, bigint, CoFheInAddress]>,
-        CoFheInUint8,
+        Readonly<[string, bigint, FHEInAddress]>,
+        FHEInUint8,
       ];
 
       console.log("bob address", bobAddress);
@@ -270,7 +270,7 @@ describe("Sdk Tests", () => {
 
     await initSdkWithBob();
     const permit1 = expectResultSuccess(
-      await cofhejs.createPermit({
+      await fhe.createPermit({
         type: "self",
         issuer: bobAddress,
       }),
@@ -289,44 +289,44 @@ describe("Sdk Tests", () => {
 
     // Sdk Store
     const dumped = dumpLocalStorage();
-    expect(dumped).to.have.keys(["cofhejs-permits", "cofhejs-keys"]);
+    expect(dumped).to.have.keys(["fhe-permits", "fhe-keys"]);
 
     // Keys store
-    expect(dumped["cofhejs-keys"]["state"]).to.have.keys(["fhe", "crs"]);
-    expect(dumped["cofhejs-keys"]["state"]["fhe"]).to.have.keys([bobChainId]);
-    expect(dumped["cofhejs-keys"]["state"]["crs"]).to.have.keys([bobChainId]);
+    expect(dumped["fhe-keys"]["state"]).to.have.keys(["fhe", "crs"]);
+    expect(dumped["fhe-keys"]["state"]["fhe"]).to.have.keys([bobChainId]);
+    expect(dumped["fhe-keys"]["state"]["crs"]).to.have.keys([bobChainId]);
 
     // Permits store
 
-    expect(dumped["cofhejs-permits"]["state"]).to.have.keys(
+    expect(dumped["fhe-permits"]["state"]).to.have.keys(
       "permits",
       "activePermitHash",
     );
 
     // Permits
     const bobsPermitsDumped =
-      dumped["cofhejs-permits"]["state"]["permits"][bobChainId][bobAddress];
+      dumped["fhe-permits"]["state"]["permits"][bobChainId][bobAddress];
     expect(bobsPermitsDumped).to.have.keys(permit1?.getHash() ?? "permit1Hash");
 
     // ActivePermit
     expect(
-      dumped["cofhejs-permits"]["state"]["activePermitHash"][bobChainId][
+      dumped["fhe-permits"]["state"]["activePermitHash"][bobChainId][
         bobAddress
       ],
     ).toEqual(permit1?.getHash());
   });
   it("createPermit", async () => {
     expectResultError(
-      await cofhejs.createPermit({
+      await fhe.createPermit({
         type: "self",
         issuer: bobAddress,
       }),
-      CofhejsErrorCode.NotInitialized,
+      FHEErrorCode.NotInitialized,
     );
 
     await initSdkWithBob();
     const permit = expectResultSuccess(
-      await cofhejs.createPermit({
+      await fhe.createPermit({
         type: "self",
         issuer: bobAddress,
       }),
@@ -352,7 +352,7 @@ describe("Sdk Tests", () => {
     // Creating new permit
 
     const permit2 = expectResultSuccess(
-      await cofhejs.createPermit({
+      await fhe.createPermit({
         type: "self",
         issuer: bobAddress,
       }),
@@ -375,7 +375,7 @@ describe("Sdk Tests", () => {
   it("unseal", async () => {
     await initSdkWithBob();
     const permit = expectResultSuccess(
-      await cofhejs.createPermit({
+      await fhe.createPermit({
         type: "self",
         issuer: bobAddress,
       }),
@@ -408,18 +408,18 @@ describe("Sdk Tests", () => {
     expect(bnToAddress(addressCleartext)).toEqual(addressValue);
   });
 
-  it("unseal via cofhe", async () => {
+  it("unseal via fhe", async () => {
     await initSdkWithBob();
 
     expectResultSuccess(
-      await cofhejs.createPermit({
+      await fhe.createPermit({
         type: "self",
         issuer: bobAddress,
       }),
     );
 
     const result = expectResultSuccess(
-      await cofhejs.unseal(
+      await fhe.unseal(
         19802325772829003454295216436649817904709442291884150996340034369559496655872n,
         FheTypes.Uint32,
       ),
@@ -428,18 +428,18 @@ describe("Sdk Tests", () => {
     console.log("result", result);
   });
 
-  it("decrypt via cofhe", async () => {
+  it("decrypt via fhe", async () => {
     await initSdkWithBob();
 
     expectResultSuccess(
-      await cofhejs.createPermit({
+      await fhe.createPermit({
         type: "self",
         issuer: bobAddress,
       }),
     );
 
     const result = expectResultSuccess(
-      await cofhejs.decrypt(
+      await fhe.decrypt(
         19802325772829003454295216436649817904709442291884150996340034369559496655872n,
         FheTypes.Uint32,
       ),

@@ -1,8 +1,5 @@
 const ARB_SEPOLIA_RPC = "https://arbitrum-sepolia.drpc.org";
 const ARB_SEPOLIA_CHAIN_ID = 421614n;
-// const ARB_SEPOLIA_COFHE_URL =
-//   "http://cofhe-sepolia-cofhe-full-lb-52f737bc5a860f4a.elb.eu-west-1.amazonaws.com";
-// const ARB_SEPOLIA_VERIFIER_URL = "http://fullstack.tn-testnets.LuxFHE.zone";
 
 /**
  * @vitest-environment happy-dom
@@ -21,13 +18,13 @@ import {
 import { afterEach } from "vitest";
 import {
   Encryptable,
-  CoFheInUint64,
-  CoFheInAddress,
-  CoFheInBool,
-  CoFheInUint8,
+  FHEInUint64,
+  FHEInAddress,
+  FHEInBool,
+  FHEInUint8,
   EncryptStep,
 } from "../src/types";
-import { cofhejs, createTfhePublicKey, Permit } from "../src/node";
+import { fhe, createTfhePublicKey, Permit } from "../src/node";
 import { _permitStore, permitStore } from "../src/core/permit/store";
 
 describe("Arbitrum Sepolia Tests", () => {
@@ -47,14 +44,14 @@ describe("Arbitrum Sepolia Tests", () => {
   const uniswapProjectId = "UNISWAP";
 
   const initSdkWithBob = async () => {
-    return cofhejs.initialize({
+    return fhe.initialize({
       provider: bobProvider,
       signer: bobSigner,
       environment: "TESTNET",
     });
   };
   const initSdkWithAda = async () => {
-    return cofhejs.initialize({
+    return fhe.initialize({
       provider: adaProvider,
       signer: adaSigner,
       environment: "TESTNET",
@@ -83,12 +80,12 @@ describe("Arbitrum Sepolia Tests", () => {
     adaAddress = await adaSigner.getAddress();
 
     localStorage.clear();
-    cofhejs.store.setState(cofhejs.store.getInitialState());
+    fhe.store.setState(fhe.store.getInitialState());
   });
 
   afterEach(() => {
     localStorage.clear();
-    cofhejs.store.setState(cofhejs.store.getInitialState());
+    fhe.store.setState(fhe.store.getInitialState());
     permitStore.store.setState(permitStore.store.getInitialState());
   });
 
@@ -97,14 +94,14 @@ describe("Arbitrum Sepolia Tests", () => {
   });
 
   it("initialize", async () => {
-    expect(cofhejs.store.getState().providerInitialized).toEqual(false);
-    expect(cofhejs.store.getState().signerInitialized).toEqual(false);
-    expect(cofhejs.store.getState().fheKeysInitialized).toEqual(false);
+    expect(fhe.store.getState().providerInitialized).toEqual(false);
+    expect(fhe.store.getState().signerInitialized).toEqual(false);
+    expect(fhe.store.getState().fheKeysInitialized).toEqual(false);
 
     await initSdkWithBob();
-    expect(cofhejs.store.getState().providerInitialized).toEqual(true);
-    expect(cofhejs.store.getState().signerInitialized).toEqual(true);
-    expect(cofhejs.store.getState().fheKeysInitialized).toEqual(true);
+    expect(fhe.store.getState().providerInitialized).toEqual(true);
+    expect(fhe.store.getState().signerInitialized).toEqual(true);
+    expect(fhe.store.getState().fheKeysInitialized).toEqual(true);
   });
 
   it("re-initialize (change account)", { timeout: 320000 }, async () => {
@@ -113,7 +110,7 @@ describe("Arbitrum Sepolia Tests", () => {
     // Bob's new permit is the active permit
 
     let bobFetchedPermit: Permit | undefined = expectResultSuccess(
-      await cofhejs.getPermit(),
+      await fhe.getPermit(),
     );
     expect(bobFetchedPermit.getHash()).toEqual(bobPermit?.getHash());
 
@@ -121,7 +118,7 @@ describe("Arbitrum Sepolia Tests", () => {
 
     // Ada does not have an active permit
 
-    const adaFetchedPermit = expectResultSuccess(await cofhejs.getPermit());
+    const adaFetchedPermit = expectResultSuccess(await fhe.getPermit());
     expect(adaFetchedPermit?.getHash()).toEqual(adaPermit?.getHash());
 
     // Switch back to bob
@@ -134,7 +131,7 @@ describe("Arbitrum Sepolia Tests", () => {
   it("encrypt", { timeout: 320000 }, async () => {
     await initSdkWithBob();
 
-    await cofhejs.createPermit({
+    await fhe.createPermit({
       type: "self",
       issuer: bobAddress,
     });
@@ -146,9 +143,9 @@ describe("Arbitrum Sepolia Tests", () => {
     console.log(
       "TEST TEST TEST\n\n\n\nTEST TEST TEST TEST\n\n\n\nTEST TEST TEST",
     );
-    cofhejs.encryptOverrideAccount("0xABCDEF");
+    fhe.encryptOverrideAccount("0xABCDEF");
 
-    const nestedEncryptResult = await cofhejs.encrypt(
+    const nestedEncryptResult = await fhe.encrypt(
       [
         { a: Encryptable.bool(false), b: Encryptable.uint64(10n), c: "hello" },
         ["hello", 20n, Encryptable.address(contractAddress)],
@@ -160,12 +157,12 @@ describe("Arbitrum Sepolia Tests", () => {
 
     type ExpectedEncryptedType = [
       {
-        readonly a: CoFheInBool;
-        readonly b: CoFheInUint64;
+        readonly a: FHEInBool;
+        readonly b: FHEInUint64;
         readonly c: string;
       },
-      Readonly<[string, bigint, CoFheInAddress]>,
-      CoFheInUint8,
+      Readonly<[string, bigint, FHEInAddress]>,
+      FHEInUint8,
     ];
 
     console.log("bob address", bobAddress);
@@ -176,18 +173,18 @@ describe("Arbitrum Sepolia Tests", () => {
   it("encryptInputs", { timeout: 320000 }, async () => {
     await initSdkWithBob();
 
-    await cofhejs.createPermit({
+    await fhe.createPermit({
       type: "self",
       issuer: bobAddress,
     });
 
-    const encryptResult = await cofhejs
+    const encryptResult = await fhe
       .encryptInputs([Encryptable.uint8("10")])
       .encrypt();
 
     const encryptData = expectResultSuccess(encryptResult);
 
-    type ExpectedEncryptedType = [CoFheInUint8];
+    type ExpectedEncryptedType = [FHEInUint8];
 
     console.log("bob address", bobAddress);
     console.log(encryptData);

@@ -8,7 +8,7 @@ import {
   SdkStore,
 } from "./store";
 import {
-  CoFheInItem,
+  FHEInItem,
   Encrypted_Inputs,
   isEncryptableItem,
   PermitOptions,
@@ -18,8 +18,8 @@ import {
   EncryptableItem,
   FheTypes,
   UnsealedItem,
-  CofhejsError,
-  CofhejsErrorCode,
+  FHEError,
+  FHEErrorCode,
   wrapFunction,
 } from "../../types";
 import { mockDecrypt, mockSealOutput } from "./testnet";
@@ -28,7 +28,7 @@ import { convertViaUtype, isValidUtype } from "../utils/utype";
 import { EthEncryptedData } from "./sealing";
 
 /**
- * Initializes the `cofhejs` to enable encrypting input data, creating permits / permissions, and decrypting sealed outputs.
+ * Initializes the `fhejs` to enable encrypting input data, creating permits / permissions, and decrypting sealed outputs.
  * Initializes `fhevm` client FHE wasm module and fetches the provided chain's FHE publicKey.
  * If a valid signer is provided, a `permit/permission` is generated automatically
  */
@@ -39,14 +39,14 @@ export const initializeCore = async (
   },
 ): Promise<Permit | undefined> => {
   if (params.provider == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.MissingProviderParam,
+    throw new FHEError({
+      code: FHEErrorCode.MissingProviderParam,
       message: "Missing initialization parameter `provider`",
     });
 
   if (params.securityZones != null && params.securityZones.length === 0)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.EmptySecurityZonesParam,
+    throw new FHEError({
+      code: FHEErrorCode.EmptySecurityZonesParam,
       message:
         "Initialization parameter provided but empty `securityZones = []`",
     });
@@ -73,7 +73,7 @@ const _checkInitialized = (
     fheKeys?: boolean;
     provider?: boolean;
     signer?: boolean;
-    coFheUrl?: boolean;
+    fheUrl?: boolean;
     verifierUrl?: boolean;
     thresholdNetworkUrl?: boolean;
   },
@@ -82,28 +82,28 @@ const _checkInitialized = (
     fheKeys,
     provider,
     signer,
-    coFheUrl,
+    fheUrl,
     verifierUrl,
     thresholdNetworkUrl,
   } = requirements ?? {};
 
   if (!state.isTestnet && fheKeys !== false && !state.fheKeysInitialized) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.NotInitialized,
+    throw new FHEError({
+      code: FHEErrorCode.NotInitialized,
       message: "FHE publicKey or CRS not initialized.",
     });
   }
 
-  if (!state.isTestnet && coFheUrl !== false && !state.coFheUrl)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.NotInitialized,
-      message: "`coFheUrl` missing from `cofhejs.initialize`.",
+  if (!state.isTestnet && fheUrl !== false && !state.fheUrl)
+    throw new FHEError({
+      code: FHEErrorCode.NotInitialized,
+      message: "`fheUrl` missing from `luxfhe.initialize`.",
     });
 
   if (!state.isTestnet && verifierUrl !== false && !state.verifierUrl)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.NotInitialized,
-      message: "`verifierUrl` missing from `cofhejs.initialize`.",
+    throw new FHEError({
+      code: FHEErrorCode.NotInitialized,
+      message: "`verifierUrl` missing from `luxfhe.initialize`.",
     });
 
   if (
@@ -111,21 +111,21 @@ const _checkInitialized = (
     thresholdNetworkUrl !== false &&
     !state.thresholdNetworkUrl
   )
-    throw new CofhejsError({
-      code: CofhejsErrorCode.NotInitialized,
-      message: "`thresholdNetworkUrl` missing from `cofhejs.initialize`.",
+    throw new FHEError({
+      code: FHEErrorCode.NotInitialized,
+      message: "`thresholdNetworkUrl` missing from `luxfhe.initialize`.",
     });
 
   if (provider !== false && !state.providerInitialized)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.ProviderNotInitialized,
-      message: "`provider` missing from `cofhejs.initialize`.",
+    throw new FHEError({
+      code: FHEErrorCode.ProviderNotInitialized,
+      message: "`provider` missing from `luxfhe.initialize`.",
     });
 
   if (signer !== false && !state.signerInitialized)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.SignerNotInitialized,
-      message: "`signer` missing from `cofhejs.initialize`.",
+    throw new FHEError({
+      code: FHEErrorCode.SignerNotInitialized,
+      message: "`signer` missing from `luxfhe.initialize`.",
     });
 };
 
@@ -197,8 +197,8 @@ export const importPermit = async (
       .map(([field, err]) => `- ${field}: ${err}`)
       .join("\n");
 
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidPermitData,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidPermitData,
       message: errorString,
     });
   }
@@ -207,8 +207,8 @@ export const importPermit = async (
     else if (parsedPermit.recipient === state.account)
       parsedPermit.type = "recipient";
     else {
-      throw new CofhejsError({
-        code: CofhejsErrorCode.InvalidPermitData,
+      throw new FHEError({
+        code: FHEErrorCode.InvalidPermitData,
         message: `Connected account <${state.account}> is not issuer or recipient`,
       });
     }
@@ -218,8 +218,8 @@ export const importPermit = async (
 
   const { valid, error } = permit.isValid();
   if (!valid) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidPermitData,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidPermitData,
       message: `Imported permit is invalid - ${error}`,
     });
   }
@@ -248,8 +248,8 @@ export const selectActivePermit = (hash: string): Permit => {
 
   const permit = permitStore.getPermit(state.chainId, state.account, hash);
   if (permit == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.PermitNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.PermitNotFound,
       message: `Permit with hash <${hash}> not found`,
     });
 
@@ -277,8 +277,8 @@ export const getPermit = (hash?: string): Permit => {
   if (hash == null) {
     const permit = permitStore.getActivePermit(state.chainId, state.account);
     if (permit == null)
-      throw new CofhejsError({
-        code: CofhejsErrorCode.PermitNotFound,
+      throw new FHEError({
+        code: FHEErrorCode.PermitNotFound,
         message: `Active permit not found`,
       });
 
@@ -287,8 +287,8 @@ export const getPermit = (hash?: string): Permit => {
 
   const permit = permitStore.getPermit(state.chainId, state.account, hash);
   if (permit == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.PermitNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.PermitNotFound,
       message: `Permit with hash <${hash}> not found`,
     });
 
@@ -310,8 +310,8 @@ export const removePermit = (hash: string, force?: boolean): string => {
   const state = _sdkStore.getState();
 
   if (hash == null) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.PermitNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.PermitNotFound,
       message: `No permit hash provided`,
     });
   }
@@ -319,8 +319,8 @@ export const removePermit = (hash: string, force?: boolean): string => {
   try {
     permitStore.removePermit(state.chainId!, state.account!, hash, force);
   } catch (e) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.CannotRemoveLastPermit,
+    throw new FHEError({
+      code: FHEErrorCode.CannotRemoveLastPermit,
       message: (e as Error).message,
     });
   }
@@ -357,7 +357,7 @@ export const getAllPermits = (): Record<string, Permit> => {
 export function encryptGetKeys(): {
   fhePublicKey: Uint8Array;
   crs: Uint8Array;
-  coFheUrl: string;
+  fheUrl: string;
   verifierUrl: string;
   thresholdNetworkUrl: string;
   account: string;
@@ -369,35 +369,35 @@ export function encryptGetKeys(): {
   _checkInitialized(state);
 
   if (state.account == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.AccountUninitialized,
+    throw new FHEError({
+      code: FHEErrorCode.AccountUninitialized,
       message: "account uninitialized",
     });
 
   if (state.chainId == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.ChainIdUninitialized,
+    throw new FHEError({
+      code: FHEErrorCode.ChainIdUninitialized,
       message: "chainId uninitialized",
     });
 
   const fhePublicKey = _store_getConnectedChainFheKey(0);
   if (fhePublicKey == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.FheKeyNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.FheKeyNotFound,
       message: "fheKey for current chain not found",
     });
 
   const crs = _store_getCrs(state.chainId);
   if (crs == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.CrsNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.CrsNotFound,
       message: "CRS for current chain not found",
     });
 
   return {
     fhePublicKey,
     crs,
-    coFheUrl: state.coFheUrl!,
+    fheUrl: state.fheUrl!,
     verifierUrl: state.verifierUrl!,
     thresholdNetworkUrl: state.thresholdNetworkUrl!,
     account: state.account,
@@ -430,13 +430,13 @@ export function encryptExtract<T>(item: T) {
 
 export function encryptReplace<T>(
   item: T,
-  encryptedItems: CoFheInItem[],
-): [Encrypted_Inputs<T>, CoFheInItem[]];
+  encryptedItems: FHEInItem[],
+): [Encrypted_Inputs<T>, FHEInItem[]];
 export function encryptReplace<T extends any[]>(
   item: [...T],
-  encryptedItems: CoFheInItem[],
-): [...Encrypted_Inputs<T>, CoFheInItem[]];
-export function encryptReplace<T>(item: T, encryptedItems: CoFheInItem[]) {
+  encryptedItems: FHEInItem[],
+): [...Encrypted_Inputs<T>, FHEInItem[]];
+export function encryptReplace<T>(item: T, encryptedItems: FHEInItem[]) {
   if (isEncryptableItem(item)) {
     return [encryptedItems[0], encryptedItems.slice(1)];
   }
@@ -445,7 +445,7 @@ export function encryptReplace<T>(item: T, encryptedItems: CoFheInItem[]) {
   if (typeof item === "object" && item !== null) {
     if (Array.isArray(item)) {
       // Array - recurse
-      return item.reduce<[any[], CoFheInItem[]]>(
+      return item.reduce<[any[], FHEInItem[]]>(
         ([acc, remaining], item) => {
           const [newItem, newRemaining] = encryptReplace(item, remaining);
           return [[...acc, newItem], newRemaining];
@@ -454,7 +454,7 @@ export function encryptReplace<T>(item: T, encryptedItems: CoFheInItem[]) {
       );
     } else {
       // Object - recurse
-      return Object.entries(item).reduce<[Record<string, any>, CoFheInItem[]]>(
+      return Object.entries(item).reduce<[Record<string, any>, FHEInItem[]]>(
         ([acc, remaining], [key, value]) => {
           const [newValue, newRemaining] = encryptReplace(value, remaining);
           return [{ ...acc, [key]: newValue }, newRemaining];
@@ -488,8 +488,8 @@ export async function unseal<U extends FheTypes>(
 
   const provider = _sdkStore.getState().provider;
   if (provider == null)
-    throw new CofhejsError({
-      code: CofhejsErrorCode.ProviderNotInitialized,
+    throw new FHEError({
+      code: FHEErrorCode.ProviderNotInitialized,
       message: "provider not initialized",
     });
 
@@ -502,8 +502,8 @@ export async function unseal<U extends FheTypes>(
     );
 
   if (resolvedAccount == null || resolvedHash == null) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.PermitNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.PermitNotFound,
       message: `Permit hash not provided and active Permit not found`,
     });
   }
@@ -514,8 +514,8 @@ export async function unseal<U extends FheTypes>(
     resolvedHash,
   );
   if (permit == null) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.PermitNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.PermitNotFound,
       message: `Permit with account <${account}> and hash <${permitHash}> not found`,
     });
   }
@@ -543,15 +543,15 @@ export async function unseal<U extends FheTypes>(
     const sealOutput = await sealOutputRes.json();
     sealed = sealOutput.sealed;
   } catch (e) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.SealOutputFailed,
+    throw new FHEError({
+      code: FHEErrorCode.SealOutputFailed,
       message: `sealOutput request failed`,
     });
   }
 
   if (sealed == null) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.SealOutputReturnedNull,
+    throw new FHEError({
+      code: FHEErrorCode.SealOutputReturnedNull,
       message: "sealed data not found",
     });
   }
@@ -559,8 +559,8 @@ export async function unseal<U extends FheTypes>(
   const unsealed = permit.unseal(sealed);
 
   if (!isValidUtype(utype)) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidUtype,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidUtype,
       message: `invalid utype :: ${utype}`,
     });
   }
@@ -585,8 +585,8 @@ export async function decrypt<U extends FheTypes>(
       resolvedAccount,
     );
   if (resolvedAccount == null || resolvedHash == null) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.PermitNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.PermitNotFound,
       message: `Permit hash not provided and active Permit not found`,
     });
   }
@@ -597,8 +597,8 @@ export async function decrypt<U extends FheTypes>(
     resolvedHash,
   );
   if (permit == null) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.PermitNotFound,
+    throw new FHEError({
+      code: FHEErrorCode.PermitNotFound,
       message: `Permit with account <${account}> and hash <${permitHash}> not found`,
     });
   }
@@ -628,30 +628,30 @@ export async function decrypt<U extends FheTypes>(
     decryptOutput = await decryptOutputRes.json();
     decrypted = bytesToBigInt(decryptOutput.decrypted);
   } catch (e: unknown) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.DecryptFailed,
+    throw new FHEError({
+      code: FHEErrorCode.DecryptFailed,
       message: `decrypt request failed`,
       cause: e as Error,
     });
   }
 
   if (decryptOutput == null || decrypted == null) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.DecryptReturnedNull,
+    throw new FHEError({
+      code: FHEErrorCode.DecryptReturnedNull,
       message: "decrypted data not found",
     });
   }
 
   if (decryptOutput.encryption_type !== utype) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidUtype,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidUtype,
       message: `unexpected encryption type :: received ${decryptOutput.encryption_type}, expected ${utype}`,
     });
   }
 
   if (!isValidUtype(utype)) {
-    throw new CofhejsError({
-      code: CofhejsErrorCode.InvalidUtype,
+    throw new FHEError({
+      code: FHEErrorCode.InvalidUtype,
       message: `invalid utype :: ${utype}`,
     });
   }

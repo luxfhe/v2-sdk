@@ -2,14 +2,14 @@
 import {
   EncryptStep,
   EncryptSetStateFn,
-  CoFheInItem,
+  FHEInItem,
   Encrypted_Inputs,
   Result,
   ResultOk,
   ResultErrOrInternal,
 } from "../../types";
 import { encryptExtract, encryptReplace } from "../sdk/index";
-import { CofhejsError, CofhejsErrorCode } from "../../types";
+import { FHEError, FHEErrorCode } from "../../types";
 import { ZkPackProveVerify } from "./zkPackProveVerify";
 import { mockEncrypt } from "../sdk/testnet";
 
@@ -44,8 +44,8 @@ export class EncryptInputsBuilder<T extends any[]> {
   /**
    * @param sender - The overridden msg.sender of the transaction that will consume the encrypted inputs.
    *
-   * If not provided, the account initialized in `cofhejs.initialize` will be used.
-   * Used when msg.sender is known to be different from the account initialized in `cofhejs.initialize`,
+   * If not provided, the account initialized in `luxfhe.initialize` will be used.
+   * Used when msg.sender is known to be different from the account initialized in `luxfhe.initialize`,
    * for example when using a paymaster.
    *
    * Example:
@@ -104,12 +104,12 @@ export class EncryptInputsBuilder<T extends any[]> {
     return encryptExtract(this.inputItems);
   }
 
-  private replaceEncryptableItems(inItems: CoFheInItem[]) {
+  private replaceEncryptableItems(inItems: FHEInItem[]) {
     const [prepared, remaining] = encryptReplace(this.inputItems, inItems);
     if (remaining.length === 0) return prepared;
 
-    throw new CofhejsError({
-      code: CofhejsErrorCode.EncryptRemainingInItems,
+    throw new FHEError({
+      code: FHEErrorCode.EncryptRemainingInItems,
       message: "Some encrypted inputs remaining after replacement",
     });
   }
@@ -172,7 +172,7 @@ export class EncryptInputsBuilder<T extends any[]> {
       );
 
       // Add securityZone and utype to the verify results
-      const inItems: CoFheInItem[] = verifyResults.map(
+      const inItems: FHEInItem[] = verifyResults.map(
         ({ ct_hash, signature }, index) => ({
           ctHash: BigInt(ct_hash),
           securityZone: this.securityZone,

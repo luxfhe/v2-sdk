@@ -1,4 +1,4 @@
-import init, { /* initThreadPool, */ init_panic_hook } from "tfhe";
+import init, { /* initThreadPool, */ init_panic_hook } from "@luxfhe/wasm";
 
 export async function initTfhe() {
   await init();
