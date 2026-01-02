@@ -8,6 +8,9 @@ const ARB_SEPOLIA_CHAIN_ID = 421614n;
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeAll, describe, expect, expectTypeOf, it } from "vitest";
+
+// Skip these tests unless explicitly running integration tests
+const SKIP_INTEGRATION = process.env.RUN_INTEGRATION_TESTS !== "true";
 import {
   AdaWallet,
   BobWallet,
@@ -27,7 +30,7 @@ import {
 import { fhe, createTfhePublicKey, Permit } from "../src/node";
 import { _permitStore, permitStore } from "../src/core/permit/store";
 
-describe("Arbitrum Sepolia Tests", () => {
+describe.skipIf(SKIP_INTEGRATION)("Arbitrum Sepolia Tests", () => {
   let bobPublicKey: string;
   let bobProvider: MockProvider;
   let bobSigner: MockSigner;

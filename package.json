@@ -2,16 +2,30 @@
   "name": "@luxfhe/sdk",
   "version": "0.5.1",
   "description": "LuxFHE SDK - Network-based Threshold TFHE with decentralized decryption",
+  "main": "./dist/web.js",
+  "module": "./dist/web.mjs",
+  "types": "./dist/web.d.ts",
+  "browser": "./dist/web.mjs",
   "exports": {
-    "./web": {
-      "types": "./dist/web.d.ts",
+    ".": {
+      "webpack": "./dist/web.mjs",
+      "browser": "./dist/web.mjs",
       "import": "./dist/web.mjs",
-      "require": "./dist/web.js"
+      "require": "./dist/web.js",
+      "default": "./dist/web.mjs"
+    },
+    "./web": {
+      "webpack": "./dist/web.mjs",
+      "browser": "./dist/web.mjs",
+      "import": "./dist/web.mjs",
+      "require": "./dist/web.js",
+      "default": "./dist/web.mjs"
     },
     "./node": {
-      "types": "./dist/node.d.ts",
+      "node": "./dist/node.mjs",
       "import": "./dist/node.mjs",
-      "require": "./dist/node.js"
+      "require": "./dist/node.js",
+      "default": "./dist/node.mjs"
     }
   },
   "engines": {

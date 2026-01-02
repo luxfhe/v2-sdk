@@ -2,137 +2,138 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-empty */
 import util from "util";
-import { writeFile, unlink } from "fs/promises";
+import path from "path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const execPromise = util.promisify(require("child_process").exec);
 
-// ZK Verifier (Image)
-
-export const ZK_VERIFIER_CONTAINER_NAME = "luxfhe-test-zk-verifier";
-
-// Function to run a Docker container using the 'execPromise' function
-export async function runZkVerifierContainer() {
-  const image = "ghcr.io/luxfi/zk-verifier:latest";
-  const ports = "-p 3000:3000";
-
-  const remove = `docker kill ${ZK_VERIFIER_CONTAINER_NAME}`;
-
-  const command = `docker run --rm --name ${ZK_VERIFIER_CONTAINER_NAME} --env RUST_LOG=trace ${ports} -d ${image}`;
-
-  try {
-    try {
-      await execPromise(remove);
-    } catch (_) {}
-    const result = await execPromise(command);
-    console.log(result.stdout);
-    console.error(result.stderr);
-  } catch (error: any) {
-    console.error(error.message);
-    throw new Error("Failed to start docker container");
-  }
-}
-
-export async function killZkVerifierContainer() {
-  const removePrevious = `docker kill ${ZK_VERIFIER_CONTAINER_NAME}`;
-
-  try {
-    await execPromise(removePrevious);
-  } catch (error: any) {
-    console.error(error.message);
-    throw new Error("Failed to remove docker container");
-  }
-}
-
-// LuxFHE (Docker Compose)
-
-const FHE_DOCKER_COMPOSE_FILE =
-  "https://raw.githubusercontent.com/luxfi/fhe/refs/heads/main/docker-compose.yml";
-const TEMP_FILE_PATH = "luxfhe-compose.yml";
+// LuxFHE Docker Compose - Uses ~/work/lux/fhe/compose.yml
+const FHE_COMPOSE_DIR =
+  process.env.LUX_FHE_DIR ||
+  path.join(process.env.HOME || "~", "work/lux/fhe");
 
 /**
- * Fetches a remote file and saves it locally.
- * @param url - The URL of the remote file.
- * @param filePath - The local path to save the file.
+ * Check if Docker daemon is running
  */
-async function fetchDockerCompose(
-  url: string,
-  filePath: string,
-): Promise<void> {
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch file: ${response.statusText}`);
-  }
-  const fileContent = await response.text();
-  await writeFile(filePath, fileContent, "utf8");
-}
-
-/**
- * Cleanup function to remove the temp docker-compose file.
- */
-async function cleanup() {
+async function isDockerRunning(): Promise<boolean> {
   try {
-    await unlink(TEMP_FILE_PATH);
-    console.log("Temporary docker-compose file removed.");
-  } catch (error) {
-    console.warn("Cleanup failed:", error);
+    await execPromise("docker info");
+    return true;
+  } catch (_) {
+    return false;
   }
 }
 
 /**
- * Starts Docker Compose after ensuring the docker-compose.yml file exists.
+ * Starts the FHE server container for testing.
+ * Uses the compose.yml from lux/fhe repository.
  */
-export async function runFHEContainers() {
+export async function runFHEContainers(): Promise<boolean> {
+  // Check if Docker is running first
+  if (!(await isDockerRunning())) {
+    console.warn(
+      "Docker daemon not running - tests will run without FHE infrastructure",
+    );
+    return false;
+  }
+
   try {
-    // Download the docker-compose.yml file
-    await fetchDockerCompose(FHE_DOCKER_COMPOSE_FILE, TEMP_FILE_PATH);
-    console.log("LuxFHE docker-compose file saved. Starting containers...");
+    console.log("Starting LuxFHE containers from", FHE_COMPOSE_DIR);
 
     try {
       await stopFHEContainers();
       console.log("Existing LuxFHE containers stopped.");
     } catch (_) {}
 
-    // Run docker-compose up
-    const process = await execPromise(
-      `docker-compose -f ${TEMP_FILE_PATH} up -d`,
-    );
-
-    console.log(process.stdout);
-    console.error(process.stderr);
-
-    // Cleanup
-    // await cleanup();
-  } catch (error) {
-    console.error("Error fetching or starting docker-compose:", error);
-  }
-}
-
-/**
- * Stops and removes all containers from docker-compose.
- */
-export async function stopFHEContainers(requiresFetch = false) {
-  try {
-    console.log("Stopping LuxFHE containers...");
-
-    if (requiresFetch) {
-      await fetchDockerCompose(FHE_DOCKER_COMPOSE_FILE, TEMP_FILE_PATH);
-      console.log("LuxFHE docker-compose file saved. Stopping containers...");
-    }
-
-    // Run docker-compose down
+    // Start only the server service (no coprocessor profile needed for tests)
     const { stdout, stderr } = await execPromise(
-      `docker-compose -f ${TEMP_FILE_PATH} down`,
+      `docker compose -f ${FHE_COMPOSE_DIR}/compose.yml up -d server`,
     );
 
     console.log(stdout);
     if (stderr) console.error(stderr);
 
-    // Cleanup
-    // await cleanup();
+    console.log("LuxFHE server started on port 8448");
+    return true;
   } catch (error: any) {
-    console.error("Error stopping docker-compose:", error.message);
+    console.warn("Failed to start LuxFHE containers:", error.message);
+    console.warn("Tests will run without FHE infrastructure");
+    return false;
   }
 }
 
+/**
+ * Starts the full FHE coprocessor stack (gateway + workers + redis).
+ */
+export async function runFHECoprocessor(): Promise<boolean> {
+  if (!(await isDockerRunning())) {
+    console.warn("Docker daemon not running - skipping coprocessor startup");
+    return false;
+  }
+
+  try {
+    console.log("Starting LuxFHE coprocessor stack from", FHE_COMPOSE_DIR);
+
+    // Start with coprocessor profile
+    const { stdout, stderr } = await execPromise(
+      `docker compose -f ${FHE_COMPOSE_DIR}/compose.yml --profile coprocessor up -d`,
+    );
+
+    console.log(stdout);
+    if (stderr) console.error(stderr);
+
+    console.log("LuxFHE coprocessor stack started");
+    return true;
+  } catch (error: any) {
+    console.warn("Failed to start LuxFHE coprocessor:", error.message);
+    return false;
+  }
+}
+
+/**
+ * Stops all LuxFHE containers.
+ */
+export async function stopFHEContainers(): Promise<void> {
+  if (!(await isDockerRunning())) {
+    return;
+  }
+
+  try {
+    console.log("Stopping LuxFHE containers...");
+
+    const { stdout, stderr } = await execPromise(
+      `docker compose -f ${FHE_COMPOSE_DIR}/compose.yml --profile coprocessor down`,
+    );
+
+    console.log(stdout);
+    if (stderr) console.error(stderr);
+
+    console.log("LuxFHE containers stopped");
+  } catch (error: any) {
+    // Ignore errors on stop
+  }
+}
+
+/**
+ * Wait for the FHE server to be healthy.
+ */
+export async function waitForFHEServer(timeoutMs = 30000): Promise<boolean> {
+  const startTime = Date.now();
+  const healthUrl = "http://localhost:8448/health";
+
+  while (Date.now() - startTime < timeoutMs) {
+    try {
+      const response = await fetch(healthUrl);
+      if (response.ok) {
+        console.log("FHE server is healthy");
+        return true;
+      }
+    } catch (_) {
+      // Server not ready yet
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  console.warn("FHE server health check timed out");
+  return false;
+}

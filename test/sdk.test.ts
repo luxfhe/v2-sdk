@@ -48,7 +48,7 @@ describe("Sdk Tests", () => {
   const counterProjectId = "COUNTER";
   const uniswapProjectId = "UNISWAP";
   const rpcUrl = "http://127.0.0.1:42069";
-  const coFheUrl = "http://127.0.0.1";
+  const fheUrl = "http://127.0.0.1:8448";
   const verifierUrl = "http://127.0.0.1:3001";
   const thresholdNetworkUrl = "http://127.0.0.1:3000";
 
@@ -56,7 +56,7 @@ describe("Sdk Tests", () => {
     return fhe.initialize({
       provider: bobProvider,
       signer: bobSigner,
-      environment: "LOCAL",
+      environment: "MOCK",
       mockConfig: {
         decryptDelay: 0,
         zkvSigner: bobSigner,
@@ -67,7 +67,7 @@ describe("Sdk Tests", () => {
     return fhe.initialize({
       provider: adaProvider,
       signer: adaSigner,
-      environment: "LOCAL",
+      environment: "MOCK",
       mockConfig: {
         decryptDelay: 0,
         zkvSigner: adaSigner,

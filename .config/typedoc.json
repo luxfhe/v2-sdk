@@ -2,7 +2,7 @@
   "entryPoints": ["../src/index.ts"],
   "out": "./../docs",
   "githubPages": true,
-  "name": "cofhe.js Docs",
+  "name": "LuxFHE SDK Docs",
   "excludePrivate": true,
   "excludeProtected": true,
   "media": "./../media",
